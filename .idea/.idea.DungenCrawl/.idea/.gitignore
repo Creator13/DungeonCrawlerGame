@@ -1,0 +1,13 @@
+﻿# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/modules.xml
+/contentModel.xml
+/projectSettingsUpdater.xml
+/.idea.DungenCrawl.iml
+# Datasource local storage ignored files
+/../../../../../../../../../:\HKU\Jaar 2\Kernmodule 4\2021\DungenCrawl\.idea\.idea.DungenCrawl\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
