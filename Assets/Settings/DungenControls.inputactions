@@ -1,0 +1,33 @@
+{
+    "name": "DungenControls",
+    "maps": [
+        {
+            "name": "Player",
+            "id": "ec2a824d-643d-4573-8eef-e089bb39a766",
+            "actions": [
+                {
+                    "name": "Walk",
+                    "type": "Value",
+                    "id": "57a0392c-d1c5-48e3-b272-db64980324c8",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c899c0da-0f12-42f8-804f-f5a4bdb1063c",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Walk",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

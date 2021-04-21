@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Dungen
 {
@@ -18,13 +19,13 @@ namespace Dungen
             {
                 characterController.Move(IsoCharacterController.MoveDirection.Up);
             }
-            else if (Input.GetKeyDown(KeyCode.A))
-            {
-                characterController.Move(IsoCharacterController.MoveDirection.Left);
-            }
             else if (Input.GetKeyDown(KeyCode.S))
             {
                 characterController.Move(IsoCharacterController.MoveDirection.Down);
+            }
+            else if (Input.GetKeyDown(KeyCode.A))
+            {
+                characterController.Move(IsoCharacterController.MoveDirection.Left);
             }
             else if (Input.GetKeyDown(KeyCode.D))
             {

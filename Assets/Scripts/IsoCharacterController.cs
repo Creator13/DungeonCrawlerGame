@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Dungen
@@ -15,11 +14,12 @@ namespace Dungen
 
         public IsoGrid grid;
 
-        private Vector2Int currentTile = Vector2Int.zero;
+        private Vector2Int currentTile;
         
         private void Start()
         {
             transform.position = grid.StartTilePosition;
+            currentTile = grid.StartTile;
         }
 
         public void Move(MoveDirection dir)
@@ -29,23 +29,23 @@ namespace Dungen
             currentTile += moveVector;
         }
 
-        private Vector2Int GetMoveVector(MoveDirection dir)
+        private static Vector2Int GetMoveVector(MoveDirection dir)
         {
             var moveVector = Vector2Int.zero;
             
             switch (dir)
             {
                 case MoveDirection.Up:
-                    moveVector.y = 1;
-                    break;
-                case MoveDirection.Down:
                     moveVector.y = -1;
                     break;
+                case MoveDirection.Down:
+                    moveVector.y = 1;
+                    break;
                 case MoveDirection.Left:
-                    moveVector.x = -1;
+                    moveVector.x = 1;
                     break;
                 case MoveDirection.Right:
-                    moveVector.x = 1;
+                    moveVector.x = -1;
                     break;
             }
 
