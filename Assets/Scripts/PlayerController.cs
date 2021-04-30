@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,7 +10,7 @@ namespace Dungen
     [RequireComponent(typeof(IsoCharacterController))]
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] private IsoFollowCamera camera;
+        [SerializeField] private new IsoFollowCamera camera;
         [SerializeField] private InputActionAsset playerInputActions;
 
         private IsoCharacterController characterController;
@@ -17,6 +18,9 @@ namespace Dungen
 
         private Tile currentTargetedTile;
         private List<Tile> currentPath;
+
+        private Coroutine moveRoutine;
+        private bool isMoving;
 
         private void Awake()
         {
@@ -39,34 +43,13 @@ namespace Dungen
             };
 
             var click = playerInputActions["PointerClick"];
+            click.performed += HandleClick;
 
             var move = playerInputActions["PointerMove"];
             move.performed += HandlePointerMove;
 
             camera.CameraMoved += HandleCameraMoved;
         }
-
-#if !ENABLE_INPUT_SYSTEM
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                characterController.Move(IsoCharacterController.MoveDirection.Up);
-            }
-            else if (Input.GetKeyDown(KeyCode.S))
-            {
-                characterController.Move(IsoCharacterController.MoveDirection.Down);
-            }
-            else if (Input.GetKeyDown(KeyCode.A))
-            {
-                characterController.Move(IsoCharacterController.MoveDirection.Left);
-            }
-            else if (Input.GetKeyDown(KeyCode.D))
-            {
-                characterController.Move(IsoCharacterController.MoveDirection.Right);
-            }
-        }
-#endif
 
         private void OnValidate()
         {
@@ -79,6 +62,8 @@ namespace Dungen
 
         private void HandleCameraMoved()
         {
+            if (isMoving) return;
+            
             var screenPos = playerInputActions["PointerMove"].ReadValue<Vector2>();
             UpdatePointerWorldPosition(screenPos);
         }
@@ -89,6 +74,37 @@ namespace Dungen
             UpdatePointerWorldPosition(screenPos);
         }
 
+        private void HandleClick(InputAction.CallbackContext ctx)
+        {
+            if (currentTargetedTile != null && currentPath != null && currentPath.Count > 0)
+            {
+                if (moveRoutine != null)
+                {
+                    StopCoroutine(moveRoutine);
+                }
+                moveRoutine = StartCoroutine(MoveOverPath(currentPath));
+            }
+        }
+
+        private IEnumerator MoveOverPath(List<Tile> path)
+        {
+            isMoving = true;
+            
+            var enumerator = path.GetEnumerator();
+            
+            while (enumerator.MoveNext())
+            {
+                HidePath();
+                
+                characterController.SetTile(enumerator.Current);
+                yield return new WaitForSeconds(.5f);
+            }
+
+            enumerator.Dispose();
+
+            isMoving = false;
+        }
+        
         private void UpdatePointerWorldPosition(Vector2 pointerScreenPos)
         {
             var ray = Camera.main.ScreenPointToRay(pointerScreenPos);
@@ -110,6 +126,7 @@ namespace Dungen
             if (currentTargetedTile != null)
             {
                 currentTargetedTile.SetMarked(false);
+                ClearPath();
             }
 
             currentTargetedTile = tile;
@@ -134,29 +151,41 @@ namespace Dungen
             }
         }
 
+        private void ShowPath()
+        {
+            foreach (var tile in currentPath)
+            {
+                tile.SetShowPath(true);
+            }
+        }
+
+        private void HidePath()
+        {
+            if (currentPath != null)
+            {
+                foreach (var tile in currentPath)
+                {
+                    tile.SetShowPath(false);
+                }
+            }
+        }
 
         private void FindPathTo(Tile targetTile)
         {
             var playerPosition = characterController.CurrentTile;
             var targetPosition = new Vector2Int(targetTile.X, targetTile.Y);
 
+            if (targetPosition == playerPosition) return;
+            
             var path = Astar.FindPathToTarget(playerPosition, targetPosition, characterController.grid.CellGrid);
             if (path.Count > 0)
             {
-                if (currentPath != null)
-                {
-                    foreach (var tile in currentPath)
-                    {
-                        tile.SetShowPath(false);
-                    }
-                }
+                // Un-show the old path
+                HidePath();
 
                 currentPath = characterController.grid.GetTilesFromPositions(path);
 
-                foreach (var tile in currentPath)
-                {
-                    tile.SetShowPath(true);
-                }
+                ShowPath();
             }
         }
     }

@@ -29,8 +29,14 @@ namespace Dungen
 
         public void Move(Vector2Int moveVector)
         {
-            transform.position = grid.GetTilePosition(CurrentTile + moveVector);
             CurrentTile += moveVector;
+            transform.position = grid.GetTilePosition(CurrentTile);
+        }
+
+        public void SetTile(Tile tile)
+        {
+            CurrentTile = new Vector2Int(tile.X, tile.Y);
+            transform.position = grid.GetTilePosition(CurrentTile);
         }
 
         private static Vector2Int GetMoveVector(MoveDirection dir)
