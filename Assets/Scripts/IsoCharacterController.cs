@@ -14,19 +14,23 @@ namespace Dungen
 
         public IsoGrid grid;
 
-        private Vector2Int currentTile;
+        public Vector2Int CurrentTile { get; private set; }
         
         private void Start()
         {
             transform.position = grid.StartTilePosition;
-            currentTile = grid.StartTile;
+            CurrentTile = grid.StartTile;
         }
 
         public void Move(MoveDirection dir)
         {
-            var moveVector = GetMoveVector(dir);
-            transform.position = grid.GetTilePosition(currentTile + moveVector);
-            currentTile += moveVector;
+            Move(GetMoveVector(dir));
+        }
+
+        public void Move(Vector2Int moveVector)
+        {
+            transform.position = grid.GetTilePosition(CurrentTile + moveVector);
+            CurrentTile += moveVector;
         }
 
         private static Vector2Int GetMoveVector(MoveDirection dir)

@@ -10,5 +10,6 @@ namespace Dungen
 
         public bool useLabels;
         public RectTransform tileLabel;
+        public Tile tilePrefab;
     }
 }
