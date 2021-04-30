@@ -14,8 +14,6 @@ namespace Dungen
         private Color startColor;
         private TileData data;
         private static readonly int HOVER_STRENGTH = Shader.PropertyToID("_HoverStrength");
-
-        public bool marked;
         
         public int X => data.x;
         public int Y => data.y;
@@ -36,8 +34,6 @@ namespace Dungen
 
         public void SetMarked(bool marked)
         {
-            this.marked = marked;
-            
             propertyBlock.SetFloat(HOVER_STRENGTH, marked ? .4f : 0);
 
             renderer.SetPropertyBlock(propertyBlock);

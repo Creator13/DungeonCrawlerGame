@@ -362,6 +362,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7604521ff4c4c8ab4e655444956ffa7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  camera: {fileID: 1687258587}
   playerInputActions: {fileID: -944628639613478452, guid: 9addfd47f43e62a409b540c939a17cd6, type: 3}
 --- !u!114 &1159030081
 MonoBehaviour:

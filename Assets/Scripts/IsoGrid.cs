@@ -17,6 +17,9 @@ namespace Dungen
         public Vector3 StartTilePosition => GetTilePosition(StartTile);
         public Vector2Int StartTile { get; private set; }
 
+        private Cell[,] cellGrid;
+        public Cell[,] CellGrid => cellGrid ??= GetCellGrid();
+
         private void Awake()
         {
             if (settings.useLabels)
@@ -81,7 +84,7 @@ namespace Dungen
             return GetTilePosition(tile.x, tile.y);
         }
 
-        public Cell[,] GetCellGrid()
+        private Cell[,] GetCellGrid()
         {
             var cells = new Cell[settings.sizeX, settings.sizeY];
 

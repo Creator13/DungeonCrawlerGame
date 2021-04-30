@@ -2,12 +2,14 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.VirtualTexturing;
 
 namespace Dungen
 {
     [RequireComponent(typeof(IsoCharacterController))]
     public class PlayerController : MonoBehaviour
     {
+        [SerializeField] private IsoFollowCamera camera;
         [SerializeField] private InputActionAsset playerInputActions;
 
         private IsoCharacterController characterController;
@@ -40,6 +42,8 @@ namespace Dungen
 
             var move = playerInputActions["PointerMove"];
             move.performed += HandlePointerMove;
+
+            camera.CameraMoved += HandleCameraMoved;
         }
 
 #if !ENABLE_INPUT_SYSTEM
@@ -73,15 +77,31 @@ namespace Dungen
             }
         }
 
+        private void HandleCameraMoved()
+        {
+            var screenPos = playerInputActions["PointerMove"].ReadValue<Vector2>();
+            UpdatePointerWorldPosition(screenPos);
+        }
+
         private void HandlePointerMove(InputAction.CallbackContext ctx)
         {
             var screenPos = ctx.ReadValue<Vector2>();
-            var ray = Camera.main.ScreenPointToRay(screenPos);
+            UpdatePointerWorldPosition(screenPos);
+        }
+
+        private void UpdatePointerWorldPosition(Vector2 pointerScreenPos)
+        {
+            var ray = Camera.main.ScreenPointToRay(pointerScreenPos);
 
             if (Physics.Raycast(ray, out var hitInfo))
             {
                 var tile = hitInfo.collider.GetComponent<Tile>();
                 SetMarkedTile(tile);
+            }
+            else
+            {
+                ClearPath();
+                currentTargetedTile?.SetMarked(false);
             }
         }
 
@@ -101,13 +121,26 @@ namespace Dungen
             }
         }
 
+        private void ClearPath()
+        {
+            if (currentPath != null)
+            {
+                foreach (var pathTile in currentPath)
+                {
+                    pathTile.SetShowPath(false);
+                }
+
+                currentPath = null;
+            }
+        }
+
+
         private void FindPathTo(Tile targetTile)
         {
             var playerPosition = characterController.CurrentTile;
             var targetPosition = new Vector2Int(targetTile.X, targetTile.Y);
 
-            var path = Astar.FindPathToTarget(playerPosition, targetPosition, characterController.grid.GetCellGrid());
-
+            var path = Astar.FindPathToTarget(playerPosition, targetPosition, characterController.grid.CellGrid);
             if (path.Count > 0)
             {
                 if (currentPath != null)
@@ -117,14 +150,14 @@ namespace Dungen
                         tile.SetShowPath(false);
                     }
                 }
-                
+
                 currentPath = characterController.grid.GetTilesFromPositions(path);
-                
+
                 foreach (var tile in currentPath)
                 {
                     tile.SetShowPath(true);
                 }
-            } 
+            }
         }
     }
 }
