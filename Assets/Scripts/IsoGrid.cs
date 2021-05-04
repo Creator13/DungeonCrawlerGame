@@ -76,7 +76,7 @@ namespace Dungen
 
         public Vector3 GetTilePosition(int x, int y)
         {
-            return new Vector3(x * tileStep, .5f, y * tileStep);
+            return new Vector3(x * tileStep, transform.position.y, y * tileStep);
         }
 
         public Vector3 GetTilePosition(Vector2Int tile)

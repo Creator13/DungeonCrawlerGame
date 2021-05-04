@@ -4,6 +4,7 @@ namespace Dungen
 {
     public class Tile : MonoBehaviour
     {
+        private static readonly int HOVER_STRENGTH = Shader.PropertyToID("_HoverStrength");
         private static readonly int BASE_COLOR = Shader.PropertyToID("_BaseColor");
         private  MaterialPropertyBlock propertyBlock;
 
@@ -13,7 +14,6 @@ namespace Dungen
         
         private Color startColor;
         private TileData data;
-        private static readonly int HOVER_STRENGTH = Shader.PropertyToID("_HoverStrength");
         
         public int X => data.x;
         public int Y => data.y;

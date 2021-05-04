@@ -266,7 +266,7 @@ GameObject:
   - component: {fileID: 1159030076}
   - component: {fileID: 1159030081}
   - component: {fileID: 1159030080}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Kube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -364,6 +364,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   camera: {fileID: 1687258587}
   playerInputActions: {fileID: -944628639613478452, guid: 9addfd47f43e62a409b540c939a17cd6, type: 3}
+  layers:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!114 &1159030081
 MonoBehaviour:
   m_ObjectHideFlags: 0

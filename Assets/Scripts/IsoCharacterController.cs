@@ -36,7 +36,9 @@ namespace Dungen
         public void SetTile(Tile tile)
         {
             CurrentTile = new Vector2Int(tile.X, tile.Y);
-            transform.position = grid.GetTilePosition(CurrentTile);
+            var pos = grid.GetTilePosition(CurrentTile);
+            pos.y = .5f;
+            transform.position = pos;
         }
 
         private static Vector2Int GetMoveVector(MoveDirection dir)

@@ -12,7 +12,8 @@ namespace Dungen
     {
         [SerializeField] private new IsoFollowCamera camera;
         [SerializeField] private InputActionAsset playerInputActions;
-
+        [SerializeField] private LayerMask layers;
+        
         private IsoCharacterController characterController;
         private RaycastHit[] hitContainer;
 
@@ -97,7 +98,7 @@ namespace Dungen
                 HidePath();
                 
                 characterController.SetTile(enumerator.Current);
-                yield return new WaitForSeconds(.5f);
+                yield return new WaitForSeconds(.2f);
             }
 
             enumerator.Dispose();
@@ -109,7 +110,7 @@ namespace Dungen
         {
             var ray = Camera.main.ScreenPointToRay(pointerScreenPos);
 
-            if (Physics.Raycast(ray, out var hitInfo))
+            if (Physics.Raycast(ray, out var hitInfo, 100, layers))
             {
                 var tile = hitInfo.collider.GetComponent<Tile>();
                 SetMarkedTile(tile);
