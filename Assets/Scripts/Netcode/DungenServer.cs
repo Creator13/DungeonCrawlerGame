@@ -7,16 +7,14 @@ namespace Dungen.Netcode
     {
         private readonly Lobby lobby;
 
-        protected override Dictionary<ushort, ServerMessageHandler> NetworkMessageHandlers { get; }
+        protected override Dictionary<ushort, ServerMessageHandler> NetworkMessageHandlers =>
+            new Dictionary<ushort, ServerMessageHandler> {
+                {(ushort) DungenMessages.Handshake, lobby.AcceptConnection},
+            };
 
         public DungenServer(ushort port) : base(port, MessageInfo.dungenTypeMap)
         {
-            lobby = new Lobby(this);
-            
-            NetworkMessageHandlers = 
-                new Dictionary<ushort, ServerMessageHandler> {
-                    {(ushort) DungenMessages.Handshake, lobby.AcceptConnection},
-                };
+            lobby = new Lobby(this, 4);
         }
     }
 }

@@ -22,12 +22,6 @@ namespace Networking
 
     public abstract class Server
     {
-        private static Dictionary<ushort, Type> builtInTypeMap =
-            new Dictionary<ushort, Type> {
-                {(ushort) BuiltinMessageTypes.Ping, typeof(PingMessage)},
-                {(ushort) BuiltinMessageTypes.Pong, typeof(PongMessage)}
-            };
-
         private readonly ushort port;
 
         private JobHandle jobHandle;
@@ -57,7 +51,7 @@ namespace Networking
 
             // Combine the user-defined type map with the technical/builtin map
             fullTypeMap = new Dictionary<ushort, Type>(typeMap);
-            builtInTypeMap.ToList().ForEach(x => fullTypeMap[x.Key] = x.Value);
+            NetworkMessageInfo.typeMap.ToList().ForEach(x => fullTypeMap[x.Key] = x.Value);
         }
 
         public bool Start()

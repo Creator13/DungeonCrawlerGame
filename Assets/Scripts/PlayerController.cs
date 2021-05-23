@@ -8,7 +8,7 @@ using UnityEngine.Rendering.VirtualTexturing;
 namespace Dungen
 {
     [RequireComponent(typeof(IsoCharacterController))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, IEntity
     {
         [SerializeField] private new IsoFollowCamera camera;
         [SerializeField] private InputActionAsset playerInputActions;

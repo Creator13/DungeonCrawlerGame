@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Dungen
 {
@@ -14,7 +15,9 @@ namespace Dungen
         
         private Color startColor;
         private TileData data;
-        
+
+        private List<IEntity> entities;
+
         public int X => data.x;
         public int Y => data.y;
 
@@ -24,6 +27,10 @@ namespace Dungen
             propertyBlock.SetFloat(HOVER_STRENGTH, 0);
             
             renderer = GetComponent<MeshRenderer>();
+        }
+
+        private void Start()
+        {
             startColor = renderer.material.GetColor(BASE_COLOR);
         }
 
@@ -41,9 +48,24 @@ namespace Dungen
 
         public void SetShowPath(bool showPath)
         {
-            propertyBlock.SetColor(BASE_COLOR, showPath ? pathColor : Color.white);
+            propertyBlock.SetColor(BASE_COLOR, showPath ? pathColor : startColor);
             
             renderer.SetPropertyBlock(propertyBlock);
+        }
+
+        public void AddEntity(IEntity entity)
+        {
+            entities.Add(entity);
+        }
+
+        public void RemoveEntity(IEntity entity)
+        {
+            entities.Remove(entity);
+        }
+
+        public void GetDistributedPosition(int i)
+        {
+            
         }
     }
 }

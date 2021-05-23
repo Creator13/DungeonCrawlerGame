@@ -1,24 +1,28 @@
 ﻿using System.Collections.Generic;
 using Networking;
+using UnityEngine;
 
 namespace Dungen.Netcode
 {
     public class DungenClient : Client
     {
-        protected override Dictionary<ushort, ClientMessageHandler> NetworkMessageHandlers { get; }
-
-        public DungenClient()
-        {
-            NetworkMessageHandlers = new Dictionary<ushort, ClientMessageHandler> {
+        protected override Dictionary<ushort, ClientMessageHandler> NetworkMessageHandlers =>
+            new Dictionary<ushort, ClientMessageHandler> {
                 {(ushort) DungenMessages.HandshakeResponse, HandleHandshakeResponse}
             };
-        }
-        
-        protected override void OnConnected() { }
 
-        private void HandleHandshakeResponse(Client client, MessageHeader header)
+        public DungenClient() : base(MessageInfo.dungenTypeMap) { }
+
+        protected override void OnConnected()
         {
-            
+            var msg = new HandshakeMessage {name = "Casper"};
+            SendPackedMessage(msg);
+        }
+
+        private void HandleHandshakeResponse(MessageHeader header)
+        {
+            var message = (HandshakeResponseMessage) header;
+            Debug.Log($"The server says: {message.message}");
         }
     }
 }

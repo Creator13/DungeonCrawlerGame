@@ -25,5 +25,10 @@ namespace Dungen.Netcode
         {
             client.Connect(port: 1511);
         }
+
+        public void Disconnect()
+        {
+            client.Disconnect();
+        }
     }
 }
