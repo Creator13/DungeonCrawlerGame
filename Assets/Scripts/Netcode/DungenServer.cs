@@ -5,7 +5,7 @@ namespace Dungen.Netcode
 {
     public class DungenServer : Server
     {
-        private readonly Lobby lobby;
+        public readonly Lobby lobby;
 
         protected override Dictionary<ushort, ServerMessageHandler> NetworkMessageHandlers =>
             new Dictionary<ushort, ServerMessageHandler> {

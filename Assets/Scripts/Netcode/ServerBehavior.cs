@@ -13,17 +13,17 @@ namespace Dungen.Netcode
 
         private void Start()
         {
-            server.Start();
+            server?.Start();
         }
 
         private void Update()
         {
-            server.Update();
+            server?.Update();
         }
 
         private void OnDestroy()
         {
-            server.Stop();
+            server?.Stop();
         }
     }
 }

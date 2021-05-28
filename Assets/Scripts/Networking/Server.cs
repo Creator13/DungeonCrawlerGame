@@ -22,6 +22,8 @@ namespace Networking
 
     public abstract class Server
     {
+        private static readonly int capacity = 32;
+
         private readonly ushort port;
 
         private JobHandle jobHandle;
@@ -43,7 +45,15 @@ namespace Networking
 
         protected abstract Dictionary<ushort, ServerMessageHandler> NetworkMessageHandlers { get; }
 
+        // Public events
+        public event Action<bool> RunningStateChanged;
+        public event Action ConnectionsUpdated;
+        public event Action<NetworkConnection> ConnectionRemoved;
+
+        // Public properties
         public bool IsRunning { get; private set; }
+        public List<NetworkConnection> Connections => connections.ToArray().ToList();
+        public int MaxConnections => capacity;
 
         protected Server(ushort port, IDictionary<ushort, Type> typeMap)
         {
@@ -57,7 +67,7 @@ namespace Networking
         public bool Start()
         {
             // Create Driver
-            driver = NetworkDriver.Create(new ReliableUtility.Parameters {WindowSize = 32});
+            driver = NetworkDriver.Create(new ReliableUtility.Parameters {WindowSize = capacity});
             pipeline = driver.CreatePipeline(typeof(ReliableSequencedPipelineStage));
 
             // Open listener on server port
@@ -69,11 +79,12 @@ namespace Networking
                 return false;
             }
 
-            connections = new NativeList<NetworkConnection>(32, Allocator.Persistent);
+            connections = new NativeList<NetworkConnection>(capacity, Allocator.Persistent);
 
             driver.Listen();
 
             IsRunning = true;
+            RunningStateChanged?.Invoke(IsRunning);
 
             Debug.Log($"Started server on port {port}!");
 
@@ -84,14 +95,22 @@ namespace Networking
         {
             if (!IsRunning) return;
 
+            IsRunning = false;
+            RunningStateChanged?.Invoke(false);
+
             jobHandle.Complete();
 
-            // TODO officially disconnect all current connections
+            for (var i = 0; i < connections.Length; i++)
+            {
+                driver.Disconnect(connections[i]);
+                ConnectionRemoved?.Invoke(connections[i]);
+                connections[i] = default;
+            }
+
+            driver.ScheduleUpdate().Complete();
 
             driver.Dispose();
             connections.Dispose();
-
-            IsRunning = false;
 
             Debug.Log($"Stopped server on port {port}.");
         }
@@ -105,10 +124,13 @@ namespace Networking
             // Clean up connections, remove stale ones
             for (var i = 0; i < connections.Length; i++)
             {
-                if (!connections[i].IsCreated)
+                if (!connections[i].IsCreated ||
+                    connections[i].GetState(driver) == NetworkConnection.State.Disconnected)
                 {
+                    ConnectionRemoved?.Invoke(connections[i]);
                     connections.RemoveAtSwapBack(i);
                     --i;
+                    ConnectionsUpdated?.Invoke();
                 }
             }
 
@@ -118,6 +140,7 @@ namespace Networking
             {
                 connections.Add(c);
                 AcceptConnection(c);
+                ConnectionsUpdated?.Invoke();
             }
 
             foreach (var connection in connections)
@@ -131,6 +154,10 @@ namespace Networking
                     if (cmd == NetworkEvent.Type.Data)
                     {
                         ReadDataAsMessage(connection, reader);
+                    }
+                    else if (cmd == NetworkEvent.Type.Disconnect)
+                    {
+                        connection.Close(driver);
                     }
                 }
             }

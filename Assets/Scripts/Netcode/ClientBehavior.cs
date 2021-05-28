@@ -1,34 +1,45 @@
 ﻿using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Dungen.Netcode
 {
     public class ClientBehavior : MonoBehaviour
     {
-        private DungenClient client;
-        
-        private void Start()
+        public DungenClient Client { get; private set; }
+
+        public void Initialize(string name)
         {
-            client = new DungenClient();
+            Client = new DungenClient(name);
         }
 
         private void OnDestroy()
         {
-            client.Dispose();
+            Client?.Dispose();
         }
 
         private void Update()
         {
-            client.Update();
+            Client?.Update();
         }
 
-        public void Connect()
+        public void SimpleConnect()
         {
-            client.Connect(port: 1511);
+            Initialize("Generic name");
+            Connect("127.0.0.1", 1511);
+        }
+
+        public void Connect(string address, ushort port = 1511)
+        {
+            Assert.IsNotNull(Client, "Client was not yet initialized.");
+            
+            Client.Connect(address, port);
         }
 
         public void Disconnect()
         {
-            client.Disconnect();
+            Assert.IsNotNull(Client, "Client was not yet initialized.");
+            
+            Client.Disconnect();
         }
     }
 }

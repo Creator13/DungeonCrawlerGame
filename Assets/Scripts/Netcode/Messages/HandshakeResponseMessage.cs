@@ -7,14 +7,15 @@ namespace Dungen.Netcode
     {
 		public override ushort Type => (ushort) DungenMessages.HandshakeResponse;
 
-		public string message;
+		public int status;
+		public string playerName;
 		public uint networkId;
 
 		public override void SerializeObject(ref DataStreamWriter writer) {
 			// very important to call this first
 			base.SerializeObject(ref writer);
 
-			writer.WriteFixedString128(message);
+			writer.WriteFixedString128(playerName);
 			writer.WriteUInt(networkId);
 		}
 
@@ -22,7 +23,7 @@ namespace Dungen.Netcode
 			// very important to call this first
 			base.DeserializeObject(ref reader);
 
-			message = reader.ReadFixedString128().ToString();
+			playerName = reader.ReadFixedString128().ToString();
 			networkId = reader.ReadUInt();
 		}
 	}

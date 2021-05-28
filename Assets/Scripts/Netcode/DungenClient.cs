@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Networking;
 using UnityEngine;
 
@@ -11,18 +12,30 @@ namespace Dungen.Netcode
                 {(ushort) DungenMessages.HandshakeResponse, HandleHandshakeResponse}
             };
 
-        public DungenClient() : base(MessageInfo.dungenTypeMap) { }
+        private readonly string originalPlayerName;
+        
+        public string PlayerName { get; private set; }
+        public uint NetworkID { get; private set; }
+
+        public DungenClient(string playerName) : base(MessageInfo.dungenTypeMap)
+        {
+            originalPlayerName = playerName;
+        }
 
         protected override void OnConnected()
         {
-            var msg = new HandshakeMessage {name = "Casper"};
-            SendPackedMessage(msg);
+            var handshake = new HandshakeMessage {requestedPlayerName = originalPlayerName};
+            SendPackedMessage(handshake);
         }
 
         private void HandleHandshakeResponse(MessageHeader header)
         {
-            var message = (HandshakeResponseMessage) header;
-            Debug.Log($"The server says: {message.message}");
+            var response = (HandshakeResponseMessage) header;
+            if (response.status >= 0)
+            {
+                NetworkID = response.networkId;
+                PlayerName = response.playerName;
+            }
         }
     }
 }
