@@ -55,6 +55,8 @@ namespace Dungen.Netcode
                     name = handshake.requestedPlayerName
                 });
                 PlayersUpdated?.Invoke();
+                
+                server.MarkKeepAlive(connection.InternalId);
             }
             else
             {
@@ -78,6 +80,9 @@ namespace Dungen.Netcode
             var player = players.First(p => p.id == connection.InternalId);
             players.Remove(player);
 
+            server.UnmarkKeepAlive(connection);
+            server.DisconnectClient(connection);
+            
             var conn = connections.First(c => c.InternalId == connection.InternalId);
             connections.Remove(conn);
             PlayersUpdated?.Invoke();

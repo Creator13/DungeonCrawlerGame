@@ -13,7 +13,7 @@ namespace Dungen.Netcode
     
     public enum DungenMessages : ushort
     {
-        Handshake, 
-        HandshakeResponse
+        Handshake = 1, 
+        HandshakeResponse = 2
     }
 }

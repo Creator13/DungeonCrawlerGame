@@ -36,10 +36,11 @@ namespace Networking
 
         // Public properties
         public string ConnectionIP { get; private set; }
-        
+        public ConnectionStatus connectionStatus => connected;
+
         // Public events
         public event ConnectionStatusDelegate ConnectionStatusChanged;
-        
+
         protected Client(IDictionary<ushort, Type> typeMap)
         {
             this.typeMap = new Dictionary<ushort, Type>(typeMap);
@@ -158,8 +159,10 @@ namespace Networking
                     var header = (MessageHeader) Activator.CreateInstance(typeMap[msgType]);
                     header.DeserializeObject(ref reader);
 
+                    var hasKey = false;
                     if (DefaultMessageHandlers.ContainsKey(msgType))
                     {
+                        hasKey = true;
                         try
                         {
                             DefaultMessageHandlers[msgType].Invoke(header);
@@ -169,9 +172,10 @@ namespace Networking
                             Debug.LogError($"Malformed message received: {msgType}\n{e}");
                         }
                     }
-
+                    
                     if (NetworkMessageHandlers.ContainsKey(msgType))
                     {
+                        hasKey = true;
                         try
                         {
                             NetworkMessageHandlers[msgType].Invoke(header);
@@ -181,7 +185,8 @@ namespace Networking
                             Debug.LogError($"Malformed message received: {msgType}\n{e}");
                         }
                     }
-                    else
+                    
+                    if (!hasKey)
                     {
                         Debug.LogWarning($"Unsupported message type received: {msgType}");
                     }
@@ -220,6 +225,7 @@ namespace Networking
         {
             var pongMsg = new PongMessage();
             SendPackedMessage(pongMsg);
+            Debug.Log("pong");
         }
     }
 }

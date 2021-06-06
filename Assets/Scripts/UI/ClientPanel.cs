@@ -58,13 +58,13 @@ namespace UI
 
         private void OnDestroy()
         {
-            if (client != null)
-            {
-                client.ConnectionStatusChanged -= UpdateConnectionStatus;
-            }
-
             removeButton.onClick.RemoveListener(Remove);
             disconnectButton.onClick.RemoveListener(Disconnect);
+        }
+
+        private void Update()
+        {
+            UpdateConnectionStatus(client.connectionStatus);
         }
 
         private void UpdateConnectionStatus(Client.ConnectionStatus status)

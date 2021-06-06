@@ -6,6 +6,7 @@ using Unity.Networking.Transport;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Networking.Transport.Utilities;
+using Utils;
 
 namespace Networking
 {
@@ -13,16 +14,16 @@ namespace Networking
 
     public enum BuiltinMessageTypes : ushort { Ping = 60001, Pong = 60002 }
 
-    public class PingPong
+    public class KeepAliveStatus
     {
-        public float lastSendTime = 0;
-        public int status = -1;
-        public string name = ""; // because of weird issues...
+        public float lastSendTime;
+        public bool receivedReplySinceLast;
     }
 
     public abstract class Server
     {
-        private static readonly int capacity = 32;
+        private const int CAPACITY = 32;
+        private const float KEEP_ALIVE_TIMEOUT = 5f;
 
         private readonly ushort port;
 
@@ -33,8 +34,8 @@ namespace Networking
 
         private List<NetworkConnection> playableConnections;
 
-        // TODO unused for now
-        private Dictionary<NetworkConnection, PingPong> pongDict = new Dictionary<NetworkConnection, PingPong>();
+        private Dictionary<NetworkConnection, KeepAliveStatus> keepAliveStatusMap =
+            new Dictionary<NetworkConnection, KeepAliveStatus>();
 
         private Dictionary<ushort, Type> fullTypeMap;
 
@@ -53,7 +54,7 @@ namespace Networking
         // Public properties
         public bool IsRunning { get; private set; }
         public List<NetworkConnection> Connections => connections.ToArray().ToList();
-        public int MaxConnections => capacity;
+        public int MaxConnections => CAPACITY;
 
         protected Server(ushort port, IDictionary<ushort, Type> typeMap)
         {
@@ -67,7 +68,7 @@ namespace Networking
         public bool Start()
         {
             // Create Driver
-            driver = NetworkDriver.Create(new ReliableUtility.Parameters {WindowSize = capacity});
+            driver = NetworkDriver.Create(new ReliableUtility.Parameters {WindowSize = CAPACITY});
             pipeline = driver.CreatePipeline(typeof(ReliableSequencedPipelineStage));
 
             // Open listener on server port
@@ -79,7 +80,7 @@ namespace Networking
                 return false;
             }
 
-            connections = new NativeList<NetworkConnection>(capacity, Allocator.Persistent);
+            connections = new NativeList<NetworkConnection>(CAPACITY, Allocator.Persistent);
 
             driver.Listen();
 
@@ -102,9 +103,7 @@ namespace Networking
 
             for (var i = 0; i < connections.Length; i++)
             {
-                driver.Disconnect(connections[i]);
-                ConnectionRemoved?.Invoke(connections[i]);
-                connections[i] = default;
+                DisconnectClient(connections[i]);
             }
 
             driver.ScheduleUpdate().Complete();
@@ -235,6 +234,8 @@ namespace Networking
             //     }
             // }
 
+            PingClients();
+            
             jobHandle = driver.ScheduleUpdate();
         }
 
@@ -245,14 +246,16 @@ namespace Networking
             var header = (MessageHeader) Activator.CreateInstance(fullTypeMap[msgType]);
             header.DeserializeObject(ref reader);
 
+            var hasKey = false;
             // First execute default handlers to ensure proper functioning of server & client connection
             if (DefaultMessageHandlers.ContainsKey(msgType))
             {
+                hasKey = true;
                 try
                 {
                     DefaultMessageHandlers[msgType].Invoke(connection, header);
                 }
-                catch (Exception e)
+                catch (KeyNotFoundException e)
                 {
                     Debug.LogError($"Badly formatted message received: {msgType}\n{e.StackTrace}");
                 }
@@ -261,16 +264,18 @@ namespace Networking
             // Then execute game-specific handlers
             if (NetworkMessageHandlers.ContainsKey(msgType))
             {
+                hasKey = true;
                 try
                 {
                     NetworkMessageHandlers[msgType].Invoke(connection, header);
                 }
-                catch (Exception e)
+                catch (KeyNotFoundException e)
                 {
                     Debug.LogError($"Badly formatted message received: {msgType}\n{e.StackTrace}");
                 }
             }
-            else
+            
+            if (!hasKey)
             {
                 Debug.LogWarning($"Unsupported message type received: {msgType}");
             }
@@ -303,6 +308,83 @@ namespace Networking
                     driver.EndSend(writer);
                 }
             }
+        }
+
+        private void PingClients()
+        {
+            for (var i = 0; i < connections.Length; i++)
+            {
+                if (!connections[i].IsCreated) continue;
+
+                if (keepAliveStatusMap.ContainsKey(connections[i]))
+                {
+                    var status = keepAliveStatusMap[connections[i]];
+
+                    var timeSinceLast = Time.time - status.lastSendTime;
+
+                    // No need to send new message, we heard from the player less than five seconds ago.
+                    if (timeSinceLast < KEEP_ALIVE_TIMEOUT) continue;
+
+                    if (status.receivedReplySinceLast)
+                    {
+                        // Everything is normal, next ping
+                        SendPing(connections[i]);
+                    }
+                }
+            }
+        }
+
+        private void SendPing(NetworkConnection connection)
+        {
+            var status = keepAliveStatusMap[connection];
+            
+            SendUnicast(connection, new PingMessage());
+            status.receivedReplySinceLast = false;
+            status.lastSendTime = Time.time;
+            
+            Debug.Log("ping");
+        }
+
+        public void MarkKeepAlive(int connectionId)
+        {
+            // Convert connection native list to array because LINQ doesn't work with native lists
+            var connections = this.connections.ToArray();
+            
+            if (!connections.Any(c => c.InternalId == connectionId))
+            {
+                Debug.LogError($"Tried to mark a non-existing connection for keep-alive. (id {connectionId})");
+                return;
+            }
+
+            var connection = connections.First(c => c.InternalId == connectionId);
+
+            if (!connection.IsCreated)
+            {
+                Debug.LogError($"Tried to mark an inactive connection for keep-alive. (id {connectionId})");
+                return;
+            }
+
+            if (keepAliveStatusMap.ContainsKey(connection))
+            {
+                Debug.LogWarning($"Tried to mark an already-marked connection for keep-alive. (id {connectionId})");
+            }
+
+            keepAliveStatusMap[connection] = new KeepAliveStatus {lastSendTime = 0};
+            SendPing(connection);
+        }
+
+        public void UnmarkKeepAlive(NetworkConnection connection)
+        {
+            if (!keepAliveStatusMap.Remove(connection))
+            {
+                Debug.LogWarning(
+                    $"Tried to unmark a connection for keep-alive that wasn't being kept alive. (id {connection.InternalId})");
+            }
+        }
+
+        public void DisconnectClient(NetworkConnection connection)
+        {
+            driver.Disconnect(connection);
         }
 
         // Static handler functions
@@ -427,7 +509,10 @@ namespace Networking
 
         private void HandleClientPong(NetworkConnection connection, MessageHeader header)
         {
-            pongDict[connection].status = 3; //reset retry count
+            if (connection.IsCreated)
+            {
+                keepAliveStatusMap[connection].receivedReplySinceLast = true;
+            }
         }
     }
 }
