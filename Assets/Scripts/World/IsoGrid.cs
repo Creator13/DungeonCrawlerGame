@@ -90,8 +90,7 @@ namespace Dungen
 
             foreach (var tile in tiles)
             {
-                var cell = new Cell
-                {
+                var cell = new Cell {
                     gridPosition = new Vector2Int(tile.X, tile.Y)
                 };
 

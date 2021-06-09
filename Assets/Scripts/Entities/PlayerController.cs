@@ -13,7 +13,7 @@ namespace Dungen
         [SerializeField] private new IsoFollowCamera camera;
         [SerializeField] private InputActionAsset playerInputActions;
         [SerializeField] private LayerMask layers;
-        
+
         private IsoCharacterController characterController;
         private RaycastHit[] hitContainer;
 
@@ -64,7 +64,7 @@ namespace Dungen
         private void HandleCameraMoved()
         {
             if (isMoving) return;
-            
+
             var screenPos = playerInputActions["PointerMove"].ReadValue<Vector2>();
             UpdatePointerWorldPosition(screenPos);
         }
@@ -83,6 +83,7 @@ namespace Dungen
                 {
                     StopCoroutine(moveRoutine);
                 }
+
                 moveRoutine = StartCoroutine(MoveOverPath(currentPath));
             }
         }
@@ -90,13 +91,13 @@ namespace Dungen
         private IEnumerator MoveOverPath(List<Tile> path)
         {
             isMoving = true;
-            
+
             var enumerator = path.GetEnumerator();
-            
+
             while (enumerator.MoveNext())
             {
                 HidePath();
-                
+
                 characterController.SetTile(enumerator.Current);
                 yield return new WaitForSeconds(.2f);
             }
@@ -105,7 +106,7 @@ namespace Dungen
 
             isMoving = false;
         }
-        
+
         private void UpdatePointerWorldPosition(Vector2 pointerScreenPos)
         {
             var ray = Camera.main.ScreenPointToRay(pointerScreenPos);
@@ -177,7 +178,7 @@ namespace Dungen
             var targetPosition = new Vector2Int(targetTile.X, targetTile.Y);
 
             if (targetPosition == playerPosition) return;
-            
+
             var path = Astar.FindPathToTarget(playerPosition, targetPosition, characterController.grid.CellGrid);
             if (path.Count > 0)
             {

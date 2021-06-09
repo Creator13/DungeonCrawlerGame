@@ -2,7 +2,5 @@
 
 namespace Dungen.UI
 {
-    public class WaitingToStartView : MonoBehaviour
-    {
-    }
+    public class WaitingToStartView : MonoBehaviour { }
 }

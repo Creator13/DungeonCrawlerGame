@@ -10,7 +10,6 @@ namespace Dungen.Gameplay
 {
     public class DungenGame : MonoBehaviour
     {
-        
         public FiniteStateMachine GameStateMachine { get; private set; }
 
         [SerializeField] private Modal modal;
@@ -19,7 +18,7 @@ namespace Dungen.Gameplay
 
         public DungenClient Client => clientBehaviour.Client;
         public Modal Modal => modal;
-        
+
         private void Awake()
         {
             GameStateMachine = new FiniteStateMachine();
@@ -42,7 +41,7 @@ namespace Dungen.Gameplay
 
             GameStateMachine.ChangeState(newState);
         }
-        
+
         public void ConnectToServer(string name, string ip)
         {
             clientBehaviour.CreateAndConnect(this, name, ip);

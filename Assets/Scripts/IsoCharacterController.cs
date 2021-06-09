@@ -15,7 +15,7 @@ namespace Dungen
         public IsoGrid grid;
 
         public Vector2Int CurrentTile { get; private set; }
-        
+
         private void Start()
         {
             transform.position = grid.StartTilePosition;
@@ -44,7 +44,7 @@ namespace Dungen
         private static Vector2Int GetMoveVector(MoveDirection dir)
         {
             var moveVector = Vector2Int.zero;
-            
+
             switch (dir)
             {
                 case MoveDirection.Up:

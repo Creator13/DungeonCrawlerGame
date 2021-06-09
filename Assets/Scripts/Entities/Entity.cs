@@ -1,7 +1,4 @@
 ﻿namespace Dungen
 {
-    public interface IEntity
-    {
-        
-    }
+    public interface IEntity { }
 }

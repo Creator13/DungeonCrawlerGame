@@ -5,17 +5,17 @@ namespace Dungen.Netcode
 {
     public static class MessageInfo
     {
-        public static readonly Dictionary<ushort, Type> dungenTypeMap = new Dictionary<ushort, Type>{
+        public static readonly Dictionary<ushort, Type> dungenTypeMap = new Dictionary<ushort, Type> {
             {(ushort) DungenMessage.Handshake, typeof(HandshakeMessage)},
             {(ushort) DungenMessage.HandshakeResponse, typeof(HandshakeResponseMessage)},
             {(ushort) DungenMessage.StartRequest, typeof(StartRequestMessage)},
             {(ushort) DungenMessage.StartRequestResponse, typeof(StartRequestResponseMessage)},
         };
     }
-    
+
     public enum DungenMessage : ushort
     {
-        Handshake, 
+        Handshake,
         HandshakeResponse,
         StartRequest,
         StartRequestResponse,
@@ -25,6 +25,7 @@ namespace Dungen.Netcode
         PlayerLeft,
         SetTurn,
         TurnAction, // TODO specificize
+
         // TurnActionConfirmed?
         TurnActionPerformed,
         Tick,

@@ -1,7 +1,6 @@
 ﻿using Dungen.Gameplay;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Dungen.UI
@@ -9,12 +8,12 @@ namespace Dungen.UI
     public class JoinMenuView : MonoBehaviour
     {
         [SerializeField] private DungenGame gameController;
-        
+
         [SerializeField] private Button newGameButton;
         [SerializeField] private Button joinGameButton;
         [SerializeField] private TMP_InputField ipInput;
         [SerializeField] private TMP_InputField nameInput;
-        
+
         public void Start()
         {
             joinGameButton.onClick.AddListener(JoinGame);

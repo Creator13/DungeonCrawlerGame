@@ -36,14 +36,14 @@ namespace Dungen.Gameplay.States
         public override void Exit()
         {
             base.Exit();
-            
+
             gameController.Client.RemoveHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
         }
 
         private void HandleStartRequestResponse(MessageHeader header)
         {
             var response = (StartRequestResponseMessage) header;
-            
+
             gameController.Modal.ShowModal(Modal.ModalDialogAction.Confirm, "Server says", $"{response.status}");
         }
     }

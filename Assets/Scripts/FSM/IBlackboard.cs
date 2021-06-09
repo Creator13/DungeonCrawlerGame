@@ -1,7 +1,4 @@
 ﻿namespace FSM
 {
-    public interface IBlackboard
-    {
-        
-    }
+    public interface IBlackboard { }
 }

@@ -23,13 +23,13 @@ namespace Dungen.Netcode
         {
             // Cast into throwaway to check if the message is completely valid.
             var _ = (StartRequestMessage) header;
-            
+
             if (lobby.PlayerCount > 1 && !lobby.Full)
             {
                 SendUnicast(connection, new StartRequestResponseMessage {
                     status = StartRequestResponseMessage.StartRequestResponse.Accepted
                 });
-                
+
                 // TODO send game start messages
             }
             else if (lobby.PlayerCount < 2)

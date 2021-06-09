@@ -12,7 +12,7 @@ public class IsoFollowCamera : MonoBehaviour
 
     private new Camera camera;
     public Camera Camera => camera ??= GetComponent<Camera>();
-    
+
     public event Action CameraMoved;
 
     private void Awake()
@@ -33,7 +33,7 @@ public class IsoFollowCamera : MonoBehaviour
         {
             transform.position =
                 Vector3.Lerp(transform.position, target.position + followOffset, Time.deltaTime * speed);
-            
+
             CameraMoved?.Invoke();
         }
     }

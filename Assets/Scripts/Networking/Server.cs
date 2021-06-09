@@ -6,7 +6,6 @@ using Unity.Networking.Transport;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Networking.Transport.Utilities;
-using Utils;
 
 namespace Networking
 {

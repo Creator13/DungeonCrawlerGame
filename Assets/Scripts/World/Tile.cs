@@ -7,12 +7,12 @@ namespace Dungen
     {
         private static readonly int HOVER_STRENGTH = Shader.PropertyToID("_HoverStrength");
         private static readonly int BASE_COLOR = Shader.PropertyToID("_BaseColor");
-        private  MaterialPropertyBlock propertyBlock;
+        private MaterialPropertyBlock propertyBlock;
 
         private static readonly Color pathColor = new Color(255 / 255f, 173 / 255f, 83 / 255f);
-        
+
         private MeshRenderer renderer;
-        
+
         private Color startColor;
         private TileData data;
 
@@ -25,7 +25,7 @@ namespace Dungen
         {
             propertyBlock = new MaterialPropertyBlock();
             propertyBlock.SetFloat(HOVER_STRENGTH, 0);
-            
+
             renderer = GetComponent<MeshRenderer>();
         }
 
@@ -49,7 +49,7 @@ namespace Dungen
         public void SetShowPath(bool showPath)
         {
             propertyBlock.SetColor(BASE_COLOR, showPath ? pathColor : startColor);
-            
+
             renderer.SetPropertyBlock(propertyBlock);
         }
 
@@ -63,9 +63,6 @@ namespace Dungen
             entities.Remove(entity);
         }
 
-        public void GetDistributedPosition(int i)
-        {
-            
-        }
+        public void GetDistributedPosition(int i) { }
     }
 }

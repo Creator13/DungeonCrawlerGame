@@ -55,7 +55,7 @@ namespace Dungen.Netcode
                 PlayersUpdated?.Invoke();
 
                 server.MarkKeepAlive(connection.InternalId);
-                
+
                 Debug.Log($"{handshake.requestedPlayerName} joined the lobby!");
             }
             else

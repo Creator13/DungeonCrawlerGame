@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Dungen.Gameplay;
 using Dungen.Gameplay.States;
 using Networking;
-using UnityEngine;
 
 namespace Dungen.Netcode
 {
@@ -55,7 +53,7 @@ namespace Dungen.Netcode
                 PlayerName = response.playerName;
             }
 
-            gameController.RequestStateChange<WaitingToStartState>();
+            gameController.RequestStateChange<WaitingToStartState>(); // TODO replace with event to eliminate the gameController reference?
         }
 
         public void AddHandler(DungenMessage messageType, ClientMessageHandler handler)

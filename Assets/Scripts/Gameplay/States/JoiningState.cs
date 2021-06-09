@@ -1,8 +1,5 @@
-﻿using Dungen.Netcode;
-using Dungen.UI;
+﻿using Dungen.UI;
 using FSM;
-using Networking;
-using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Dungen.Gameplay.States
@@ -21,7 +18,7 @@ namespace Dungen.Gameplay.States
         public override void Enter(FiniteStateMachine parent)
         {
             base.Enter(parent);
-            
+
             view.gameObject.SetActive(true);
         }
 
@@ -36,7 +33,7 @@ namespace Dungen.Gameplay.States
         public override void Exit()
         {
             base.Exit();
-            
+
             view.gameObject.SetActive(false);
         }
 
