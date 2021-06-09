@@ -4,11 +4,13 @@ namespace Dungen.Netcode
 {
     public class ServerBehavior : MonoBehaviour
     {
+        [SerializeField] private ushort port = 1511;
+        
         private DungenServer server;
 
         private void Awake()
         {
-            server = new DungenServer(1511);
+            server = new DungenServer(port);
         }
 
         private void Start()
@@ -19,6 +21,11 @@ namespace Dungen.Netcode
         private void Update()
         {
             server?.Update();
+        }
+
+        private void OnDisable()
+        {
+            server?.Stop();
         }
 
         private void OnDestroy()

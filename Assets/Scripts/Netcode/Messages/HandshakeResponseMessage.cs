@@ -1,30 +1,34 @@
 using Networking;
 using Unity.Networking.Transport;
 
-namespace Dungen.Netcode 
+namespace Dungen.Netcode
 {
     public class HandshakeResponseMessage : MessageHeader
     {
-		public override ushort Type => (ushort) DungenMessages.HandshakeResponse;
+        public enum HandshakeResponseStatus : byte { Accepted, BadRequest, LobbyFull }
 
-		public int status;
-		public string playerName;
-		public uint networkId;
+        public override ushort Type => (ushort) DungenMessage.HandshakeResponse;
 
-		public override void SerializeObject(ref DataStreamWriter writer) {
-			// very important to call this first
-			base.SerializeObject(ref writer);
+        public HandshakeResponseStatus status;
+        public string playerName;
+        public uint networkId;
 
-			writer.WriteFixedString128(playerName);
-			writer.WriteUInt(networkId);
-		}
+        public override void SerializeObject(ref DataStreamWriter writer)
+        {
+            base.SerializeObject(ref writer);
 
-		public override void DeserializeObject(ref DataStreamReader reader) {
-			// very important to call this first
-			base.DeserializeObject(ref reader);
+            writer.WriteFixedString128(playerName);
+            writer.WriteUInt(networkId);
+            writer.WriteByte((byte) status);
+        }
 
-			playerName = reader.ReadFixedString128().ToString();
-			networkId = reader.ReadUInt();
-		}
-	}
+        public override void DeserializeObject(ref DataStreamReader reader)
+        {
+            base.DeserializeObject(ref reader);
+
+            playerName = reader.ReadFixedString128().ToString();
+            networkId = reader.ReadUInt();
+            status = (HandshakeResponseStatus) reader.ReadByte();
+        }
+    }
 }

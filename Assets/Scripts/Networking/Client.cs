@@ -129,14 +129,14 @@ namespace Networking
             // TODO This code handles timeout
             if (connected == ConnectionStatus.Connecting && Time.time - startTime > 5f)
             {
-                Debug.Log("Failed to connect! Timed out");
+                Debug.LogWarning("Failed to connect! Timed out");
                 connected = ConnectionStatus.Disconnected;
                 ConnectionStatusChanged?.Invoke(connected);
             }
 
             if (!connection.IsCreated)
             {
-                Debug.Log("Something went wrong during connect");
+                Debug.LogError("Something went wrong during connect");
                 return;
             }
 
@@ -152,44 +152,7 @@ namespace Networking
                 }
                 else if (cmd == NetworkEvent.Type.Data)
                 {
-                    // First UInt is always message type (this is our own first design choice)
-                    var msgType = reader.ReadUShort();
-
-                    // TODO: Create message instance, and parse data...
-                    var header = (MessageHeader) Activator.CreateInstance(typeMap[msgType]);
-                    header.DeserializeObject(ref reader);
-
-                    var hasKey = false;
-                    if (DefaultMessageHandlers.ContainsKey(msgType))
-                    {
-                        hasKey = true;
-                        try
-                        {
-                            DefaultMessageHandlers[msgType].Invoke(header);
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogError($"Malformed message received: {msgType}\n{e}");
-                        }
-                    }
-                    
-                    if (NetworkMessageHandlers.ContainsKey(msgType))
-                    {
-                        hasKey = true;
-                        try
-                        {
-                            NetworkMessageHandlers[msgType].Invoke(header);
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogError($"Malformed message received: {msgType}\n{e}");
-                        }
-                    }
-                    
-                    if (!hasKey)
-                    {
-                        Debug.LogWarning($"Unsupported message type received: {msgType}");
-                    }
+                    ReadDataAsMessage(reader);
                 }
                 else if (cmd == NetworkEvent.Type.Disconnect)
                 {
@@ -197,6 +160,7 @@ namespace Networking
                     connection = default;
                     connected = ConnectionStatus.Disconnected;
                     ConnectionStatusChanged?.Invoke(connected);
+                    OnDisconnected();
                 }
             }
 
@@ -205,11 +169,13 @@ namespace Networking
 
         protected abstract void OnConnected();
 
+        protected abstract void OnDisconnected();
+
         public void SendPackedMessage(MessageHeader header)
         {
+            jobHandle.Complete();
             var result = driver.BeginSend(pipeline, connection, out var writer);
 
-            // non-0 is an error code
             if (result == 0)
             {
                 header.SerializeObject(ref writer);
@@ -221,11 +187,50 @@ namespace Networking
             }
         }
 
+        private void ReadDataAsMessage(DataStreamReader reader)
+        {
+            var msgType = reader.ReadUShort();
+
+            var header = (MessageHeader) Activator.CreateInstance(typeMap[msgType]);
+            header.DeserializeObject(ref reader);
+
+            var hasKey = false;
+            if (DefaultMessageHandlers.ContainsKey(msgType))
+            {
+                hasKey = true;
+                try
+                {
+                    DefaultMessageHandlers[msgType].Invoke(header);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Malformed message received: code {msgType}\n{e}");
+                }
+            }
+
+            if (NetworkMessageHandlers.ContainsKey(msgType))
+            {
+                hasKey = true;
+                try
+                {
+                    NetworkMessageHandlers[msgType].Invoke(header);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Malformed message received: code {msgType}\n{e}");
+                }
+            }
+
+            if (!hasKey)
+            {
+                Debug.LogWarning($"Unsupported message type received: code {msgType}");
+            }
+        }
+
         private void HandlePing(MessageHeader header)
         {
             var pongMsg = new PongMessage();
             SendPackedMessage(pongMsg);
-            Debug.Log("pong");
         }
     }
 }

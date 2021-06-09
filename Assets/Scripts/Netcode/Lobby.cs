@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Networking;
-using UI;
 using Unity.Networking.Transport;
 using UnityEngine;
 
@@ -13,11 +12,15 @@ namespace Dungen.Netcode
         public event Action PlayersUpdated;
 
         private readonly int lobbyCapacity;
-        private readonly List<NetworkConnection> connections = new List<NetworkConnection>();
         private readonly DungenServer server;
-        public readonly List<Player> players = new List<Player>();
+
+        private readonly Dictionary<NetworkConnection, PlayerInfo> players =
+            new Dictionary<NetworkConnection, PlayerInfo>();
 
         public int MaxPlayers => lobbyCapacity;
+        public int PlayerCount => players.Count;
+        public PlayerInfo[] Players => players.Values.ToArray();
+        public bool Full => PlayerCount >= MaxPlayers;
 
         public Lobby(DungenServer server, int capacity)
         {
@@ -38,34 +41,32 @@ namespace Dungen.Netcode
             }
 
             HandshakeResponseMessage handshakeResponse;
-            if (connections.Count < lobbyCapacity)
+            if (!Full)
             {
-                connections.Add(connection);
-                
                 handshakeResponse = new HandshakeResponseMessage {
-                    status = 0,
+                    status = HandshakeResponseMessage.HandshakeResponseStatus.Accepted,
                     playerName = handshake.requestedPlayerName,
                     networkId = (uint) connection.InternalId
                 };
-                
-                players.Add(new Player() {
-                    active = true,
-                    color = Color.clear,
-                    id = connection.InternalId,
+
+                players[connection] = new PlayerInfo {
                     name = handshake.requestedPlayerName
-                });
+                };
                 PlayersUpdated?.Invoke();
-                
+
                 server.MarkKeepAlive(connection.InternalId);
+                
+                Debug.Log($"{handshake.requestedPlayerName} joined the lobby!");
             }
             else
             {
                 handshakeResponse = new HandshakeResponseMessage {
-                    status = -1,
+                    status = HandshakeResponseMessage.HandshakeResponseStatus.LobbyFull,
                     playerName = handshake.requestedPlayerName,
                     networkId = (uint) connection.InternalId
                 };
             }
+
             server.SendUnicast(connection, handshakeResponse);
         }
 
@@ -76,21 +77,18 @@ namespace Dungen.Netcode
                 throw new InvalidOperationException(
                     $"Cannot remove connection from lobby that is not already in lobby. (id {connection.InternalId})");
             }
-            
-            var player = players.First(p => p.id == connection.InternalId);
-            players.Remove(player);
+
+            players.Remove(connection);
 
             server.UnmarkKeepAlive(connection);
             server.DisconnectClient(connection);
-            
-            var conn = connections.First(c => c.InternalId == connection.InternalId);
-            connections.Remove(conn);
+
             PlayersUpdated?.Invoke();
         }
 
         private bool ConnectionInLobby(NetworkConnection connection)
         {
-            return connections.Any(c => c.InternalId == connection.InternalId);
+            return players.ContainsKey(connection);
         }
     }
 }

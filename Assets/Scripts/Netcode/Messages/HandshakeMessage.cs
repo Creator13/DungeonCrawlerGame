@@ -5,7 +5,7 @@ namespace Dungen.Netcode
 {
     public class HandshakeMessage : MessageHeader
     {
-		public override ushort Type => (ushort) DungenMessages.Handshake;
+		public override ushort Type => (ushort) DungenMessage.Handshake;
 
 		public string requestedPlayerName = "";
 
