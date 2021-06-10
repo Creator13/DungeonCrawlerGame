@@ -202,7 +202,7 @@ namespace Networking
                 {
                     DefaultMessageHandlers[msgType].Invoke(header);
                 }
-                catch (Exception e)
+                catch (InvalidCastException e)
                 {
                     Debug.LogError($"Malformed message received: code {msgType}\n{e}");
                 }
@@ -215,7 +215,7 @@ namespace Networking
                 {
                     NetworkMessageHandlers[msgType].Invoke(header);
                 }
-                catch (Exception e)
+                catch (InvalidCastException e)
                 {
                     Debug.LogError($"Malformed message received: code {msgType}\n{e}");
                 }

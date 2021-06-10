@@ -1,43 +1,29 @@
 ﻿using Dungen.UI;
 using FSM;
-using UnityEngine.InputSystem;
 
 namespace Dungen.Gameplay.States
 {
-    public class JoiningState : State
+    public class JoiningState : State<DungenBlackboard>
     {
-        private readonly JoinMenuView view;
-        private readonly DungenGame gameController;
+        public JoiningState(DungenBlackboard blackboard) : base(blackboard) { }
 
-        public JoiningState(JoinMenuView view, DungenGame game)
-        {
-            this.view = view;
-            this.gameController = game;
-        }
-
-        public override void Enter(FiniteStateMachine parent)
+        private JoinMenuView View => blackboard.ui.JoinMenuView;
+        
+        public override void Enter(FiniteStateMachine<DungenBlackboard> parent)
         {
             base.Enter(parent);
 
-            view.gameObject.SetActive(true);
-        }
-
-        public override void Execute()
-        {
-            if (Keyboard.current.spaceKey.wasPressedThisFrame)
-            {
-                gameController.StartServerAndConnect("batman", "127.0.0.1");
-            }
+            View.gameObject.SetActive(true);
         }
 
         public override void Exit()
         {
             base.Exit();
 
-            view.gameObject.SetActive(false);
+            View.gameObject.SetActive(false);
         }
 
-        public override bool ValidateTransition(State newState)
+        public override bool ValidateTransition(State<DungenBlackboard> newState)
         {
             return newState.GetType() == typeof(WaitingToStartState);
         }

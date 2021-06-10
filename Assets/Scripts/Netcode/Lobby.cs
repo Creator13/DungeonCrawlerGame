@@ -49,12 +49,25 @@ namespace Dungen.Netcode
                     networkId = (uint) connection.InternalId
                 };
 
-                players[connection] = new PlayerInfo {
-                    name = handshake.requestedPlayerName
-                };
+                var playerInfo = new PlayerInfo((uint) connection.InternalId, handshake.requestedPlayerName);
+
+                var others = Players;
+                
+                players[connection] = playerInfo;
                 PlayersUpdated?.Invoke();
 
                 server.MarkKeepAlive(connection.InternalId);
+
+                // Notify other players
+                var joinedMessage = new PlayerJoinedMessage {playerInfo = playerInfo};
+                server.SendBroadcast(joinedMessage, toExclude: connection, reliable: true);
+                
+                // Send other players to newly joined player
+                foreach (var player in others)
+                {
+                    var msg = new PlayerJoinedMessage {playerInfo = player};
+                    server.SendUnicast(connection, msg);
+                }
 
                 Debug.Log($"{handshake.requestedPlayerName} joined the lobby!");
             }
@@ -84,6 +97,10 @@ namespace Dungen.Netcode
             server.DisconnectClient(connection);
 
             PlayersUpdated?.Invoke();
+            
+            // Notify other players
+            var leftMessage = new PlayerLeftMessage {playerId = (ushort) connection.InternalId};
+            server.SendBroadcast(leftMessage, toExclude: connection);
         }
 
         private bool ConnectionInLobby(NetworkConnection connection)

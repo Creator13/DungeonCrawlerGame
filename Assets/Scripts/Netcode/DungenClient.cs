@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Dungen.Gameplay;
 using Dungen.Gameplay.States;
 using Networking;
@@ -10,16 +11,29 @@ namespace Dungen.Netcode
         private Dictionary<ushort, ClientMessageHandler> networkMessageHandlers;
 
         protected override Dictionary<ushort, ClientMessageHandler> NetworkMessageHandlers =>
-            networkMessageHandlers ??= new Dictionary<ushort, ClientMessageHandler>() {
+            networkMessageHandlers ??= new Dictionary<ushort, ClientMessageHandler> {
                 {(ushort) DungenMessage.HandshakeResponse, HandleHandshakeResponse},
+                {(ushort) DungenMessage.PlayerJoined, HandlePlayerJoined},
+                {(ushort) DungenMessage.PlayerLeft, HandlePlayerLeft},
             };
 
         private readonly string originalPlayerName;
         private readonly DungenGame gameController;
 
-        public string PlayerName { get; private set; }
-        public uint NetworkID { get; private set; }
+        private readonly Dictionary<uint, PlayerInfo> others = new Dictionary<uint, PlayerInfo>();
+
+        public PlayerInfo PlayerInfo { get; private set; }
         public bool InGame { get; private set; }
+
+        public List<PlayerInfo> Players
+        {
+            get
+            {
+                var players = others.Values.ToList();
+                players.Add(PlayerInfo);
+                return players;
+            }
+        }
 
         public DungenClient(string playerName, DungenGame gameController) : base(MessageInfo.dungenTypeMap)
         {
@@ -49,12 +63,28 @@ namespace Dungen.Netcode
             var response = (HandshakeResponseMessage) header;
             if (response.status >= 0)
             {
-                NetworkID = response.networkId;
-                PlayerName = response.playerName;
+                PlayerInfo = new PlayerInfo(response.networkId, response.playerName);
             }
 
             gameController.RequestStateChange<WaitingToStartState>(); // TODO replace with event to eliminate the gameController reference?
         }
+
+        private void HandlePlayerJoined(MessageHeader header)
+        {
+            var message = (PlayerJoinedMessage) header;
+
+            others[message.playerInfo.playerId] = message.playerInfo;
+        }
+
+        private void HandlePlayerLeft(MessageHeader header)
+        {
+            var message = (PlayerLeftMessage) header;
+
+            others.Remove(message.playerId);
+        }
+
+
+        #region Dynamic Handlers
 
         public void AddHandler(DungenMessage messageType, ClientMessageHandler handler)
         {
@@ -72,5 +102,7 @@ namespace Dungen.Netcode
         {
             NetworkMessageHandlers[(ushort) messageType] -= handler;
         }
+
+        #endregion
     }
 }

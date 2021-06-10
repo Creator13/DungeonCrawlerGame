@@ -2,39 +2,40 @@
 
 namespace FSM
 {
-    public class FiniteStateMachine
+    public class FiniteStateMachine<T> where T : IBlackboard
+
     {
-        private State currentState;
+    private State<T> currentState;
 
-        public void Initialize(State startingState)
+    public void Initialize(State<T> startingState)
+    {
+        currentState = startingState;
+        currentState?.Enter(this);
+    }
+
+    public bool ChangeState(State<T> newState)
+    {
+        if (!currentState.ValidateTransition(newState))
         {
-            currentState = startingState;
-            currentState?.Enter(this);
+            Debug.Log($"Can't transition from state {currentState} to {newState}");
+            return false;
         }
 
-        public bool ChangeState(State newState)
-        {
-            if (!currentState.ValidateTransition(newState))
-            {
-                Debug.Log($"Can't transition from state {currentState} to {newState}");
-                return false;
-            }
+        currentState?.Exit();
+        currentState = newState;
+        currentState?.Enter(this);
+        return true;
+    }
 
-            currentState?.Exit();
-            currentState = newState;
-            currentState?.Enter(this);
-            return true;
-        }
-
-        public void Update()
-        {
+    public void Update()
+    {
 #if UNITY_EDITOR
-            if (currentState == null)
-            {
-                Debug.LogWarning("State not initialized, but update was called");
-            }
-#endif
-            currentState?.Execute();
+        if (currentState == null)
+        {
+            Debug.LogWarning("State not initialized, but update was called");
         }
+#endif
+        currentState?.Execute();
+    }
     }
 }

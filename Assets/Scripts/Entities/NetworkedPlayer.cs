@@ -2,6 +2,6 @@
 {
     public class NetworkedPlayer : NetworkBehavior
     {
-        public string name;
+        public new string name;
     }
 }

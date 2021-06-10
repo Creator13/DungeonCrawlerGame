@@ -11,7 +11,7 @@ namespace Dungen
 
         private static readonly Color pathColor = new Color(255 / 255f, 173 / 255f, 83 / 255f);
 
-        private MeshRenderer renderer;
+        private new MeshRenderer renderer;
 
         private Color startColor;
         private TileData data;

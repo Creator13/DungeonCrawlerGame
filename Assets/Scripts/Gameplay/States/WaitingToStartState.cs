@@ -3,48 +3,49 @@ using Dungen.UI;
 using FSM;
 using Networking;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Dungen.Gameplay.States
 {
-    public class WaitingToStartState : State
+    public class WaitingToStartState : State<DungenBlackboard>
     {
-        private DungenGame gameController;
+        private WaitingToStartView View => blackboard.ui.WaitingToStartView;
+        
+        public WaitingToStartState(DungenBlackboard bb) : base(bb) { }
 
-        public WaitingToStartState(DungenGame game)
-        {
-            this.gameController = game;
-        }
-
-        public override void Enter(FiniteStateMachine parent)
+        public override void Enter(FiniteStateMachine<DungenBlackboard> parent)
         {
             base.Enter(parent);
 
             Debug.Log("Press space to start");
 
-            gameController.Client.AddHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
-        }
-
-        public override void Execute()
-        {
-            if (Keyboard.current.spaceKey.wasPressedThisFrame)
-            {
-                gameController.Client.RequestGameStart();
-            }
+            blackboard.gameController.Client.AddHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
+            View.gameObject.SetActive(true);
         }
 
         public override void Exit()
         {
             base.Exit();
 
-            gameController.Client.RemoveHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
+            blackboard.gameController.Client.RemoveHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
+            View.gameObject.SetActive(false);
         }
 
         private void HandleStartRequestResponse(MessageHeader header)
         {
             var response = (StartRequestResponseMessage) header;
 
-            gameController.Modal.ShowModal(Modal.ModalDialogAction.Confirm, "Server says", $"{response.status}");
+            if (response.status != StartRequestResponseMessage.StartRequestResponse.Accepted)
+            {
+                blackboard.ui.Modal.ShowModal(Modal.ModalDialogAction.Confirm, "Error", $"{response.status}");
+                return;
+            }
+
+            blackboard.gameController.RequestStateChange<GameActiveState>();
+        }
+
+        public override bool ValidateTransition(State<DungenBlackboard> newState)
+        {
+            return newState is GameActiveState;
         }
     }
 }

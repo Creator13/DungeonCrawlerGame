@@ -1,33 +1,38 @@
 ﻿using System;
 using Dungen.Gameplay.States;
 using Dungen.Netcode;
-using Dungen.UI;
 using FSM;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace Dungen.Gameplay
 {
     public class DungenGame : MonoBehaviour
     {
-        public FiniteStateMachine GameStateMachine { get; private set; }
+        public FiniteStateMachine<DungenBlackboard> GameStateMachine { get; private set; }
 
-        [SerializeField] private Modal modal;
-        [SerializeField] private JoinMenuView joinMenuView;
+        [SerializeField] private UIManager uiManager;
         [SerializeField] private ClientBehaviour clientBehaviour;
 
         public DungenClient Client => clientBehaviour.Client;
-        public Modal Modal => modal;
+
+        private DungenBlackboard blackboard;
 
         private void Awake()
         {
-            GameStateMachine = new FiniteStateMachine();
+            GameStateMachine = new FiniteStateMachine<DungenBlackboard>();
             clientBehaviour = gameObject.AddComponent<ClientBehaviour>();
+
+            blackboard = new DungenBlackboard {
+                gameController = this,
+                ui = uiManager
+            };
         }
 
         private void Start()
         {
-            GameStateMachine.Initialize(new JoiningState(joinMenuView, this));
+            GameStateMachine.Initialize(new JoiningState(blackboard));
         }
 
         private void Update()
@@ -35,9 +40,9 @@ namespace Dungen.Gameplay
             GameStateMachine.Update();
         }
 
-        public void RequestStateChange<T>() where T : State
+        public void RequestStateChange<T>() where T : State<DungenBlackboard>
         {
-            var newState = (T) Activator.CreateInstance(typeof(T), new object[] {this});
+            var newState = (T) Activator.CreateInstance(typeof(T), blackboard);
 
             GameStateMachine.ChangeState(newState);
         }

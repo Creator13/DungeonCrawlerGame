@@ -10,6 +10,8 @@ namespace Dungen.Netcode
             {(ushort) DungenMessage.HandshakeResponse, typeof(HandshakeResponseMessage)},
             {(ushort) DungenMessage.StartRequest, typeof(StartRequestMessage)},
             {(ushort) DungenMessage.StartRequestResponse, typeof(StartRequestResponseMessage)},
+            {(ushort) DungenMessage.PlayerJoined, typeof(PlayerJoinedMessage)},
+            {(ushort) DungenMessage.PlayerLeft, typeof(PlayerLeftMessage)},
         };
     }
 
@@ -22,6 +24,7 @@ namespace Dungen.Netcode
         GameStartData,
         PlayerReady,
         GameStarting,
+        PlayerJoined,
         PlayerLeft,
         SetTurn,
         TurnAction, // TODO specificize

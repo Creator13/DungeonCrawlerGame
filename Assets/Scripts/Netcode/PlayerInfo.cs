@@ -2,6 +2,13 @@
 {
     public struct PlayerInfo
     {
-        public string name;
+        public readonly uint playerId;
+        public readonly string name;
+
+        public PlayerInfo(uint playerId, string name)
+        {
+            this.playerId = playerId;
+            this.name = name;
+        }
     }
 }
