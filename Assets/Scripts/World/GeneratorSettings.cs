@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Dungen
+namespace Dungen.World
 {
     [CreateAssetMenu(fileName = "New Settings", menuName = "Generator Settings")]
     public class GeneratorSettings : ScriptableObject

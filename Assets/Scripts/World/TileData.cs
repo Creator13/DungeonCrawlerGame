@@ -1,4 +1,4 @@
-﻿namespace Dungen
+﻿namespace Dungen.World
 {
     public readonly struct TileData
     {

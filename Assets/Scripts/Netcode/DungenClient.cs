@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using Dungen.Gameplay;
 using Dungen.Gameplay.States;
 using Networking;
@@ -20,20 +20,12 @@ namespace Dungen.Netcode
         private readonly string originalPlayerName;
         private readonly DungenGame gameController;
 
-        private readonly Dictionary<uint, PlayerInfo> others = new Dictionary<uint, PlayerInfo>();
-
         public PlayerInfo PlayerInfo { get; private set; }
-        public bool InGame { get; private set; }
 
-        public List<PlayerInfo> Players
-        {
-            get
-            {
-                var players = others.Values.ToList();
-                players.Add(PlayerInfo);
-                return players;
-            }
-        }
+        public uint OwnNetworkId => PlayerInfo.networkId;
+        
+        public event Action<PlayerInfo> PlayerJoined;
+        public event Action<uint> PlayerLeft;
 
         public DungenClient(string playerName, DungenGame gameController) : base(MessageInfo.dungenTypeMap)
         {
@@ -47,10 +39,7 @@ namespace Dungen.Netcode
             SendPackedMessage(handshake);
         }
 
-        protected override void OnDisconnected()
-        {
-            InGame = false;
-        }
+        protected override void OnDisconnected() { }
 
         public void RequestGameStart()
         {
@@ -72,15 +61,13 @@ namespace Dungen.Netcode
         private void HandlePlayerJoined(MessageHeader header)
         {
             var message = (PlayerJoinedMessage) header;
-
-            others[message.playerInfo.playerId] = message.playerInfo;
+            PlayerJoined?.Invoke(message.playerInfo);
         }
 
         private void HandlePlayerLeft(MessageHeader header)
         {
             var message = (PlayerLeftMessage) header;
-
-            others.Remove(message.playerId);
+            PlayerLeft?.Invoke(message.playerId);
         }
 
 

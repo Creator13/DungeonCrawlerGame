@@ -17,7 +17,7 @@ namespace FSM
     {
         if (!currentState.ValidateTransition(newState))
         {
-            Debug.Log($"Can't transition from state {currentState} to {newState}");
+            Debug.Log($"Can't transition from state {currentState.GetType()} to {newState.GetType()}");
             return false;
         }
 

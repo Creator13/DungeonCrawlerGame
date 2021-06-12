@@ -2,12 +2,12 @@
 {
     public struct PlayerInfo
     {
-        public readonly uint playerId;
+        public readonly uint networkId;
         public readonly string name;
 
-        public PlayerInfo(uint playerId, string name)
+        public PlayerInfo(uint networkId, string name)
         {
-            this.playerId = playerId;
+            this.networkId = networkId;
             this.name = name;
         }
     }

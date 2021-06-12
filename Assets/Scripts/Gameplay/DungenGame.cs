@@ -1,23 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Dungen.Gameplay.States;
 using Dungen.Netcode;
+using Dungen.World;
 using FSM;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 namespace Dungen.Gameplay
 {
     public class DungenGame : MonoBehaviour
     {
-        public FiniteStateMachine<DungenBlackboard> GameStateMachine { get; private set; }
+        private FiniteStateMachine<DungenBlackboard> GameStateMachine { get; set; }
+        private DungenBlackboard blackboard;
 
+        [SerializeField] private PlayerController ownPlayer;
         [SerializeField] private UIManager uiManager;
         [SerializeField] private ClientBehaviour clientBehaviour;
+        [SerializeField] private GeneratorSettings generatorSettings;
+        [SerializeField] private IsoGrid grid;
+        [SerializeField] private NetworkedEntityManager entityManager;
 
         public DungenClient Client => clientBehaviour.Client;
 
-        private DungenBlackboard blackboard;
+        public Dictionary<uint, PlayerInfo> Players { get; } = new Dictionary<uint, PlayerInfo>();
 
         private void Awake()
         {
@@ -26,8 +33,11 @@ namespace Dungen.Gameplay
 
             blackboard = new DungenBlackboard {
                 gameController = this,
-                ui = uiManager
+                ui = uiManager,
+                grid = this.grid
             };
+
+            ownPlayer.gameObject.SetActive(false);
         }
 
         private void Start()
@@ -50,12 +60,65 @@ namespace Dungen.Gameplay
         public void ConnectToServer(string name, string ip)
         {
             clientBehaviour.CreateAndConnect(this, name, ip);
+
+            Client.Connected += BindClientEvents;
+            Client.Disconnected += UnbindClientEvents;
         }
 
         public void StartServerAndConnect(string name, string ip)
         {
             SceneManager.LoadScene("Server", LoadSceneMode.Additive);
             ConnectToServer(name, ip);
+        }
+
+        public void InitializeWorld(PlayerStartData[] players)
+        {
+            GenerateWorld();
+            InstatiatePlayers(players);
+        }
+
+        private void GenerateWorld()
+        {
+            var generator = new GridGenerator(generatorSettings);
+
+            grid.CreateGridFromTileDataArray(generator.GenerateGrid());
+        }
+
+        private void InstatiatePlayers(PlayerStartData[] players)
+        {
+            foreach (var playerStartData in players)
+            {
+                if (playerStartData.networkId == Client.OwnNetworkId)
+                {
+                    ownPlayer.gameObject.SetActive(true);
+                    ownPlayer.InitializeFromNetwork(playerStartData);
+                    continue;
+                }
+
+                entityManager.SpawnEntity(entityManager.networkedPlayerPrefab, playerStartData);
+            }
+        }
+
+        private void BindClientEvents()
+        {
+            Client.PlayerJoined += OnPlayerJoined;
+            Client.PlayerLeft += OnPlayerLeft;
+        }
+
+        private void UnbindClientEvents()
+        {
+            Client.PlayerJoined -= OnPlayerJoined;
+            Client.PlayerLeft -= OnPlayerLeft;
+        }
+
+        private void OnPlayerJoined(PlayerInfo playerInfo)
+        {
+            Players[playerInfo.networkId] = playerInfo;
+        }
+
+        private void OnPlayerLeft(uint playerId)
+        {
+            Players.Remove(playerId);
         }
     }
 }

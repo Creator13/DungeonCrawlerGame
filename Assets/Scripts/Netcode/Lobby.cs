@@ -7,6 +7,13 @@ using UnityEngine;
 
 namespace Dungen.Netcode
 {
+    public class LobbiedPlayer
+    {
+        public PlayerInfo playerInfo;
+        public bool sentData;
+        public bool ready;
+    }
+
     public class Lobby
     {
         public event Action PlayersUpdated;
@@ -14,12 +21,12 @@ namespace Dungen.Netcode
         private readonly int lobbyCapacity;
         private readonly DungenServer server;
 
-        private readonly Dictionary<NetworkConnection, PlayerInfo> players =
-            new Dictionary<NetworkConnection, PlayerInfo>();
+        private readonly Dictionary<NetworkConnection, LobbiedPlayer> players = new Dictionary<NetworkConnection, LobbiedPlayer>();
 
         public int MaxPlayers => lobbyCapacity;
         public int PlayerCount => players.Count;
-        public PlayerInfo[] Players => players.Values.ToArray();
+        public PlayerInfo[] Players => players.Values.Select(p => p.playerInfo).ToArray();
+        public IEnumerable<NetworkConnection> PlayerConnections => players.Keys;
         public bool Full => PlayerCount >= MaxPlayers;
 
         public Lobby(DungenServer server, int capacity)
@@ -36,32 +43,33 @@ namespace Dungen.Netcode
 
             if (ConnectionInLobby(connection))
             {
-                throw new InvalidOperationException(
-                    $"Cannot add connection to lobby that is already in lobby. (id {connection.InternalId})");
+                throw new InvalidOperationException($"Cannot add connection to lobby that is already in lobby. (id {connection.InternalId})");
             }
 
+            var networkId = DungenServer.NextNetworkId;
+            
             HandshakeResponseMessage handshakeResponse;
             if (!Full)
             {
+                var playerInfo = new PlayerInfo(networkId, handshake.requestedPlayerName);
+                
                 handshakeResponse = new HandshakeResponseMessage {
                     status = HandshakeResponseMessage.HandshakeResponseStatus.Accepted,
                     playerName = handshake.requestedPlayerName,
-                    networkId = (uint) connection.InternalId
+                    networkId = playerInfo.networkId
                 };
 
-                var playerInfo = new PlayerInfo((uint) connection.InternalId, handshake.requestedPlayerName);
-
                 var others = Players;
-                
-                players[connection] = playerInfo;
+
+                players[connection] = new LobbiedPlayer {playerInfo = playerInfo};
                 PlayersUpdated?.Invoke();
 
-                server.MarkKeepAlive(connection.InternalId);
+                server.MarkKeepAlive(connection);
 
-                // Notify other players
+                // Notify all players
                 var joinedMessage = new PlayerJoinedMessage {playerInfo = playerInfo};
-                server.SendBroadcast(joinedMessage, toExclude: connection, reliable: true);
-                
+                server.SendBroadcast(joinedMessage, reliable: true);
+
                 // Send other players to newly joined player
                 foreach (var player in others)
                 {
@@ -76,19 +84,34 @@ namespace Dungen.Netcode
                 handshakeResponse = new HandshakeResponseMessage {
                     status = HandshakeResponseMessage.HandshakeResponseStatus.LobbyFull,
                     playerName = handshake.requestedPlayerName,
-                    networkId = (uint) connection.InternalId
+                    networkId = networkId
                 };
             }
 
             server.SendUnicast(connection, handshakeResponse);
         }
 
+        public void SetReadyStatus(NetworkConnection connection, bool ready)
+        {
+            players[connection].ready = true;
+        }
+
+        public void ClearReadyStatus()
+        {
+            foreach (var p in players.Values)
+            {
+                p.ready = false;
+            }
+        }
+
         private void RemovePlayer(NetworkConnection connection)
         {
             if (!ConnectionInLobby(connection))
             {
-                throw new InvalidOperationException(
-                    $"Cannot remove connection from lobby that is not already in lobby. (id {connection.InternalId})");
+                Debug.LogWarning(
+                    $"Player associated with connection {connection.InternalId} was not in lobby, this may be caused when the lobby " +
+                    "reacts to a client disconnecting that never got into the lobby (due to it being full for example)");
+                return;
             }
 
             players.Remove(connection);
@@ -97,7 +120,7 @@ namespace Dungen.Netcode
             server.DisconnectClient(connection);
 
             PlayersUpdated?.Invoke();
-            
+
             // Notify other players
             var leftMessage = new PlayerLeftMessage {playerId = (ushort) connection.InternalId};
             server.SendBroadcast(leftMessage, toExclude: connection);

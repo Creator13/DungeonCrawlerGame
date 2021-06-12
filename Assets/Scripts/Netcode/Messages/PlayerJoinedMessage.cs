@@ -13,7 +13,7 @@ namespace Dungen.Netcode
         {
             base.SerializeObject(ref writer);
 
-            writer.WriteUInt(playerInfo.playerId);
+            writer.WriteUInt(playerInfo.networkId);
             writer.WriteFixedString32(playerInfo.name);
         }
 

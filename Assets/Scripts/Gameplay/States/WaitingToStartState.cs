@@ -19,6 +19,7 @@ namespace Dungen.Gameplay.States
             Debug.Log("Press space to start");
 
             blackboard.gameController.Client.AddHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
+            blackboard.gameController.Client.AddHandler(DungenMessage.GameStartData, HandleGameStartData);
             View.gameObject.SetActive(true);
         }
 
@@ -27,6 +28,7 @@ namespace Dungen.Gameplay.States
             base.Exit();
 
             blackboard.gameController.Client.RemoveHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
+            blackboard.gameController.Client.RemoveHandler(DungenMessage.GameStartData, HandleGameStartData);
             View.gameObject.SetActive(false);
         }
 
@@ -37,9 +39,17 @@ namespace Dungen.Gameplay.States
             if (response.status != StartRequestResponseMessage.StartRequestResponse.Accepted)
             {
                 blackboard.ui.Modal.ShowModal(Modal.ModalDialogAction.Confirm, "Error", $"{response.status}");
-                return;
             }
-
+        }
+        
+        private void HandleGameStartData(MessageHeader header)
+        {
+            var dataMessage = (GameStartDataMessage) header;
+            
+            blackboard.gameController.InitializeWorld(dataMessage.playerData);
+            
+            blackboard.gameController.Client.SendPackedMessage(new ClientReadyMessage());
+            
             blackboard.gameController.RequestStateChange<GameActiveState>();
         }
 

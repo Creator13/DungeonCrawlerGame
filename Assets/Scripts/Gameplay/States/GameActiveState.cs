@@ -4,8 +4,11 @@ namespace Dungen.Gameplay.States
 {
     public class GameActiveState : State<DungenBlackboard>
     {
-        private readonly DungenGame gameController;
-
         public GameActiveState(DungenBlackboard bb) : base(bb) { }
+
+        public override void Enter(FiniteStateMachine<DungenBlackboard> parent)
+        {
+            base.Enter(parent);
+        }
     }
 }

@@ -31,8 +31,7 @@ public class IsoFollowCamera : MonoBehaviour
 
         if (Vector3.Distance(transform.position, target.position) > 0.05f)
         {
-            transform.position =
-                Vector3.Lerp(transform.position, target.position + followOffset, Time.deltaTime * speed);
+            transform.position = Vector3.Lerp(transform.position, target.position + followOffset, Time.deltaTime * speed);
 
             CameraMoved?.Invoke();
         }

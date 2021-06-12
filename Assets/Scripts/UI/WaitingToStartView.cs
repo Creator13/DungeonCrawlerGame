@@ -25,9 +25,9 @@ namespace Dungen.UI
         private void Update()
         {
             var playerText = "";
-            foreach (var player in gameController.Client.Players)
+            foreach (var player in gameController.Players.Values)
             {
-                playerText += $"{player.name}\n";
+                playerText += $"{player.name} ({player.networkId})\n";
             }
 
             players.text = playerText;

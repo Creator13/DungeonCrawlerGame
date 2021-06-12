@@ -1,31 +1,31 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Dungen.Netcode;
+using Dungen.World;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Utils;
 
 namespace Dungen
 {
-    [RequireComponent(typeof(IsoCharacterController))]
+    [RequireComponent(typeof(IsoEntity))]
     public class PlayerController : MonoBehaviour, IEntity
     {
-        [SerializeField] private new IsoFollowCamera camera;
+        [SerializeField] private IsoFollowCamera followCam;
         [SerializeField] private InputActionAsset playerInputActions;
         [SerializeField] private LayerMask layers;
 
-        private IsoCharacterController characterController;
+        private IsoEntity playerEntity;
         private RaycastHit[] hitContainer;
 
         private Tile currentTargetedTile;
         private List<Tile> currentPath;
 
-        private Coroutine moveRoutine;
-        private bool isMoving;
+        private bool hasTurn;
 
         private void Awake()
         {
-            characterController = GetComponent<IsoCharacterController>();
+            playerEntity = GetComponent<IsoEntity>();
 
             BindActions();
         }
@@ -40,30 +40,27 @@ namespace Dungen
                 var moveVectorFloat = -ctx.ReadValue<Vector2>();
                 var moveVector = new Vector2Int((int) moveVectorFloat.normalized.x, (int) moveVectorFloat.normalized.y);
 
-                characterController.Move(moveVector);
+                playerEntity.Move(moveVector);
             };
 
-            var click = playerInputActions["PointerClick"];
-            click.performed += HandleClick;
+            playerInputActions["PointerClick"].performed += HandleClick;
+            playerInputActions["PointerMove"].performed += HandlePointerMove;
 
-            var move = playerInputActions["PointerMove"];
-            move.performed += HandlePointerMove;
-
-            camera.CameraMoved += HandleCameraMoved;
+            followCam.CameraMoved += OnCameraMoved;
         }
 
         private void OnValidate()
         {
-            // TODO replace this with a custom editor
+            // TODO replace this with a custom editor that shows all the input actions
             if (playerInputActions != null && !playerInputActions.Any(action => action.name == "Walk"))
             {
                 playerInputActions = null;
             }
         }
 
-        private void HandleCameraMoved()
+        private void OnCameraMoved()
         {
-            if (isMoving) return;
+            if (playerEntity.IsMoving) return;
 
             var screenPos = playerInputActions["PointerMove"].ReadValue<Vector2>();
             UpdatePointerWorldPosition(screenPos);
@@ -71,45 +68,27 @@ namespace Dungen
 
         private void HandlePointerMove(InputAction.CallbackContext ctx)
         {
+            if (!hasTurn) return;
+
             var screenPos = ctx.ReadValue<Vector2>();
             UpdatePointerWorldPosition(screenPos);
         }
 
         private void HandleClick(InputAction.CallbackContext ctx)
         {
-            if (currentTargetedTile != null && currentPath != null && currentPath.Count > 0)
-            {
-                if (moveRoutine != null)
-                {
-                    StopCoroutine(moveRoutine);
-                }
-
-                moveRoutine = StartCoroutine(MoveOverPath(currentPath));
-            }
-        }
-
-        private IEnumerator MoveOverPath(List<Tile> path)
-        {
-            isMoving = true;
-
-            var enumerator = path.GetEnumerator();
-
-            while (enumerator.MoveNext())
+            if (currentTargetedTile != null && currentPath != null && currentPath.Count > 0 && !playerEntity.IsMoving)
             {
                 HidePath();
-
-                characterController.SetTile(enumerator.Current);
-                yield return new WaitForSeconds(.2f);
+                currentTargetedTile.SetMarked(false);
+                playerEntity.MoveOverPath(currentPath);
+                playerEntity.MoveFinished += StartTurn;
+                EndTurn();
             }
-
-            enumerator.Dispose();
-
-            isMoving = false;
         }
 
         private void UpdatePointerWorldPosition(Vector2 pointerScreenPos)
         {
-            var ray = Camera.main.ScreenPointToRay(pointerScreenPos);
+            var ray = followCam.Camera.ScreenPointToRay(pointerScreenPos);
 
             if (Physics.Raycast(ray, out var hitInfo, 100, layers))
             {
@@ -122,6 +101,28 @@ namespace Dungen
                 currentTargetedTile?.SetMarked(false);
             }
         }
+
+        public void StartTurn()
+        {
+            hasTurn = true;
+
+            playerInputActions.Enable();
+        }
+
+        public void EndTurn()
+        {
+            hasTurn = false;
+            
+            playerInputActions.Disable();
+        }
+
+        public void InitializeFromNetwork(PlayerStartData data)
+        {
+            playerEntity.SetTileDirect(data.position);
+        }
+        
+
+        #region Pathfinding
 
         private void SetMarkedTile(Tile tile)
         {
@@ -174,21 +175,23 @@ namespace Dungen
 
         private void FindPathTo(Tile targetTile)
         {
-            var playerPosition = characterController.CurrentTile;
+            var playerPosition = playerEntity.CurrentTile;
             var targetPosition = new Vector2Int(targetTile.X, targetTile.Y);
 
             if (targetPosition == playerPosition) return;
 
-            var path = Astar.FindPathToTarget(playerPosition, targetPosition, characterController.grid.CellGrid);
+            var path = Astar.FindPathToTarget(playerPosition, targetPosition, playerEntity.grid.CellGrid);
             if (path.Count > 0)
             {
                 // Un-show the old path
                 HidePath();
 
-                currentPath = characterController.grid.GetTilesFromPositions(path);
+                currentPath = playerEntity.grid.GetTilesFromPositions(path);
 
                 ShowPath();
             }
         }
+
+        #endregion
     }
 }

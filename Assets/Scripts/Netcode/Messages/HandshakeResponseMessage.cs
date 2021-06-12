@@ -5,7 +5,7 @@ namespace Dungen.Netcode
 {
     public class HandshakeResponseMessage : MessageHeader
     {
-        public enum HandshakeResponseStatus : byte { Accepted, BadRequest, LobbyFull }
+        public enum HandshakeResponseStatus : byte { Accepted, GameInProgress, LobbyFull }
 
         public override ushort Type => (ushort) DungenMessage.HandshakeResponse;
 

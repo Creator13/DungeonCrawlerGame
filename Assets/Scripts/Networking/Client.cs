@@ -23,7 +23,7 @@ namespace Networking
 
         protected abstract Dictionary<ushort, ClientMessageHandler> NetworkMessageHandlers { get; }
 
-        private Dictionary<ushort, Type> typeMap;
+        private readonly Dictionary<ushort, Type> typeMap;
 
         private NetworkDriver driver;
         private NetworkPipeline pipeline;
@@ -39,7 +39,8 @@ namespace Networking
         public ConnectionStatus connectionStatus => connected;
 
         // Public events
-        public event ConnectionStatusDelegate ConnectionStatusChanged;
+        public event Action Connected;
+        public event Action Disconnected;
 
         protected Client(IDictionary<ushort, Type> typeMap)
         {
@@ -83,7 +84,6 @@ namespace Networking
             connection = driver.Connect(endpoint);
 
             connected = ConnectionStatus.Connecting;
-            ConnectionStatusChanged?.Invoke(connected);
         }
 
         public void Disconnect()
@@ -104,6 +104,7 @@ namespace Networking
             driver.ScheduleUpdate().Complete();
 
             connected = ConnectionStatus.Disconnected;
+            Disconnected?.Invoke();
         }
 
         public void Dispose()
@@ -130,8 +131,8 @@ namespace Networking
             if (connected == ConnectionStatus.Connecting && Time.time - startTime > 5f)
             {
                 Debug.LogWarning("Failed to connect! Timed out");
-                connected = ConnectionStatus.Disconnected;
-                ConnectionStatusChanged?.Invoke(connected);
+                Disconnect();
+                return;
             }
 
             if (!connection.IsCreated)
@@ -147,7 +148,7 @@ namespace Networking
                 {
                     Debug.Log("Connected!");
                     connected = ConnectionStatus.Connected;
-                    ConnectionStatusChanged?.Invoke(connected);
+                    Connected?.Invoke();
                     OnConnected();
                 }
                 else if (cmd == NetworkEvent.Type.Data)
@@ -159,7 +160,7 @@ namespace Networking
                     Debug.Log("Client got disconnected from server");
                     connection = default;
                     connected = ConnectionStatus.Disconnected;
-                    ConnectionStatusChanged?.Invoke(connected);
+                    Disconnected?.Invoke();
                     OnDisconnected();
                 }
             }

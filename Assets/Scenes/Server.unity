@@ -167,3 +167,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   port: 1511
+  generatorSettings: {fileID: 11400000, guid: 6d0de5391989c4342aaf7c93bf2d1cab, type: 2}

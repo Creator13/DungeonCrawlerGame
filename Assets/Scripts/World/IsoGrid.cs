@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace Dungen
+namespace Dungen.World
 {
     public class IsoGrid : MonoBehaviour
     {
@@ -12,10 +12,11 @@ namespace Dungen
 
         public float tileStep = 1;
 
-        private List<Tile> tiles;
+        private Tile[] tiles;
 
-        public Vector3 StartTilePosition => GetTilePosition(StartTile);
-        public Vector2Int StartTile { get; private set; }
+        // Start tile is the center (rounded down because integer division)
+        public Vector3 StartTilePosition => GetTileWorldPosition(StartTile);
+        public Vector2Int StartTile => new Vector2Int(settings.sizeX / 2, settings.sizeY / 2);
 
         private Cell[,] cellGrid;
         public Cell[,] CellGrid => cellGrid ??= GetCellGrid();
@@ -31,27 +32,15 @@ namespace Dungen
 
                 Assert.IsNotNull(labelCanvas);
             }
-
-            // Start tile is the center (rounded down because integer division)
-            StartTile = new Vector2Int(settings.sizeX / 2, settings.sizeY / 2);
         }
 
-        private void Start()
+        public void CreateGridFromTileDataArray(TileData[] tiles)
         {
-            Generate();
-        }
-
-        public void Generate()
-        {
-            var size = settings.sizeX * settings.sizeY;
-
-            tiles = new List<Tile>(settings.sizeX);
-
-            for (var i = 0; i < size; i++)
+            this.tiles = new Tile[tiles.Length];
+            
+            for(var i = 0; i < tiles.Length; i++)
             {
-                var data = new TileData(i % settings.sizeY, i / settings.sizeX);
-                var tile = TileFromData(data);
-                tiles.Add(tile);
+                this.tiles[i] = TileFromData(tiles[i]);
             }
         }
 
@@ -74,14 +63,14 @@ namespace Dungen
             return tile;
         }
 
-        public Vector3 GetTilePosition(int x, int y)
+        public Vector3 GetTileWorldPosition(int x, int y)
         {
             return new Vector3(x * tileStep, transform.position.y, y * tileStep);
         }
 
-        public Vector3 GetTilePosition(Vector2Int tile)
+        public Vector3 GetTileWorldPosition(Vector2Int tile)
         {
-            return GetTilePosition(tile.x, tile.y);
+            return GetTileWorldPosition(tile.x, tile.y);
         }
 
         private Cell[,] GetCellGrid()

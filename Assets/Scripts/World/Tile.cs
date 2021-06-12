@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Dungen
+namespace Dungen.World
 {
     public class Tile : MonoBehaviour
     {

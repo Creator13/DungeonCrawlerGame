@@ -1,4 +1,5 @@
-﻿using FSM;
+﻿using Dungen.World;
+using FSM;
 
 namespace Dungen.Gameplay.States
 {
@@ -6,5 +7,6 @@ namespace Dungen.Gameplay.States
     {
         public DungenGame gameController;
         public UIManager ui;
+        public IsoGrid grid;
     }
 }

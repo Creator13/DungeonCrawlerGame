@@ -880,6 +880,7 @@ GameObject:
   - component: {fileID: 607889176}
   - component: {fileID: 607889175}
   - component: {fileID: 607889174}
+  - component: {fileID: 607889178}
   m_Layer: 5
   m_Name: Main UI
   m_TagString: Untagged
@@ -970,6 +971,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &607889178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 607889173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c02466d3980b478dadb27be984825707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modal: {fileID: 1602775935}
+  joinMenuView: {fileID: 946488693}
+  waitingToStartView: {fileID: 1803528960}
 --- !u!1 &653260035
 GameObject:
   m_ObjectHideFlags: 0
@@ -1827,7 +1843,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &1159030076
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1917,7 +1933,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7604521ff4c4c8ab4e655444956ffa7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camera: {fileID: 1687258587}
+  followCam: {fileID: 1687258587}
   playerInputActions: {fileID: -944628639613478452, guid: 9addfd47f43e62a409b540c939a17cd6, type: 3}
   layers:
     serializedVersion: 2
@@ -2010,7 +2026,6 @@ GameObject:
   - component: {fileID: 1309739075}
   - component: {fileID: 1309739077}
   - component: {fileID: 1309739078}
-  - component: {fileID: 1309739076}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -2032,18 +2047,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1309739076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1309739074}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3fb9d96b2984789af1c99a361bda139, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1309739077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2056,8 +2059,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d2ff91b6fb74c8fb504e050fb0d8caf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiManager: {fileID: 1309739078}
-  clientBehaviour: {fileID: 1309739076}
+  ownPlayer: {fileID: 1159030080}
+  uiManager: {fileID: 607889178}
+  clientBehaviour: {fileID: 0}
+  generatorSettings: {fileID: 11400000, guid: 6d0de5391989c4342aaf7c93bf2d1cab, type: 2}
+  grid: {fileID: 2039601331}
+  entityManager: {fileID: 1309739078}
 --- !u!114 &1309739078
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2067,12 +2074,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1309739074}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c02466d3980b478dadb27be984825707, type: 3}
+  m_Script: {fileID: 11500000, guid: a2eb05035b0842e69cda55d8b8fac4cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modal: {fileID: 1602775935}
-  joinMenuView: {fileID: 946488693}
-  waitingToStartView: {fileID: 1803528960}
+  gameController: {fileID: 1309739077}
+  grid: {fileID: 2039601331}
+  networkedPlayerPrefab: {fileID: 4146866149442222460, guid: 3cb0444a73809474d9e1831c34f86fb0, type: 3}
 --- !u!1 &1342402214
 GameObject:
   m_ObjectHideFlags: 0
@@ -3865,6 +3872,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2039601332}
   - component: {fileID: 2039601331}
+  - component: {fileID: 2039601333}
   m_Layer: 0
   m_Name: Room
   m_TagString: Untagged
@@ -3902,6 +3910,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2039601333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2039601330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 617c3dd0041d4e288db67892cf837eb3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridGeneratorSettings: {fileID: 11400000, guid: 6d0de5391989c4342aaf7c93bf2d1cab, type: 2}
+  grid: {fileID: 2039601331}
 --- !u!1 &2065451661
 GameObject:
   m_ObjectHideFlags: 0

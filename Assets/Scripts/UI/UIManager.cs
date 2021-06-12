@@ -1,5 +1,4 @@
-﻿using System;
-using Dungen.UI;
+﻿using Dungen.UI;
 using UnityEngine;
 
 namespace Dungen.Gameplay

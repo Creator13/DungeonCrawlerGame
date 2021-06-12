@@ -183,8 +183,7 @@ namespace Networking
             {
                 if (!connections[i].IsCreated || connections[i] == toExclude) continue;
 
-                var result = driver.BeginSend(reliable ? pipeline : NetworkPipeline.Null, connections[i],
-                    out var writer);
+                var result = driver.BeginSend(reliable ? pipeline : NetworkPipeline.Null, connections[i], out var writer);
                 if (result == 0)
                 {
                     header.SerializeObject(ref writer);
@@ -193,28 +192,41 @@ namespace Networking
             }
         }
 
-        public void MarkKeepAlive(int connectionId)
+        public void SendBroadcast(MessageHeader header, IEnumerable<NetworkConnection> connections, bool reliable = true)
+        {
+            foreach (var connection in connections)
+            {
+                if (!connection.IsCreated) continue;
+
+                var res = driver.BeginSend(reliable ? pipeline : NetworkPipeline.Null, connection, out var writer);
+                if (res == 0)
+                {
+                    header.SerializeObject(ref writer);
+                    driver.EndSend(writer);
+                }
+            }
+        }
+
+        public void MarkKeepAlive(NetworkConnection connection)
         {
             // Convert connection native list to array because LINQ doesn't work with native lists
             var connections = this.connections.ToArray();
 
-            if (!connections.Any(c => c.InternalId == connectionId))
+            if (!connections.Contains(connection))
             {
-                Debug.LogError($"Tried to mark a non-existing connection for keep-alive. (id {connectionId})");
+                Debug.LogError($"Tried to mark a non-existing connection for keep-alive. (internal id {connection.InternalId})");
                 return;
             }
 
-            var connection = connections.First(c => c.InternalId == connectionId);
-
             if (!connection.IsCreated)
             {
-                Debug.LogError($"Tried to mark an inactive connection for keep-alive. (id {connectionId})");
+                Debug.LogError($"Tried to mark an inactive connection for keep-alive. (internal id {connection.InternalId})");
                 return;
             }
 
             if (keepAliveStatusMap.ContainsKey(connection))
             {
-                Debug.LogWarning($"Tried to mark an already-marked connection for keep-alive. (id {connectionId})");
+                Debug.LogWarning($"Tried to mark an already-marked connection for keep-alive. (internal id {connection.InternalId})");
             }
 
             keepAliveStatusMap[connection] = new KeepAliveStatus {lastSendTime = 0};
