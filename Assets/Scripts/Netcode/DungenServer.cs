@@ -32,12 +32,19 @@ namespace Dungen.Netcode
             // Cast into throwaway to check if the message is completely valid.
             var _ = (StartRequestMessage) header;
 
+#if DUNGEN_NETWORK_DEBUG
+            SendUnicast(connection, new StartRequestResponseMessage {
+                status = StartRequestResponseMessage.StartRequestResponse.Accepted
+            });
+
+            SendStartData();
+#else
             if (lobby.PlayerCount > 1 && !lobby.Full)
             {
                 SendUnicast(connection, new StartRequestResponseMessage {
                     status = StartRequestResponseMessage.StartRequestResponse.Accepted
                 });
-                
+
                 SendStartData();
             }
             else if (lobby.PlayerCount < 2)
@@ -52,12 +59,13 @@ namespace Dungen.Netcode
                     status = StartRequestResponseMessage.StartRequestResponse.UndefinedFailure
                 });
             }
+#endif
         }
 
         private void HandleClientReady(NetworkConnection connection, MessageHeader header)
         {
             var msg = (ClientReadyMessage) header;
-            
+
             lobby.SetReadyStatus(connection, true);
         }
 
@@ -74,17 +82,14 @@ namespace Dungen.Netcode
                 };
                 i++;
             }
-            
+
             var startDataMessage = new GameStartDataMessage {
                 playerData = playerData
             };
-            
+
             SendBroadcast(startDataMessage, lobby.PlayerConnections, true);
         }
 
-        private void StartGame()
-        {
-            
-        }
+        private void StartGame() { }
     }
 }

@@ -19,7 +19,7 @@ namespace Dungen.Gameplay
             entity.grid = grid;
             entity.NetworkId = startData.networkId;
             entity.name = gameController.Players[startData.networkId].name;
-            entity.SetTileDirect(startData.position);
+            entity.SetTile(startData.position);
 
             entities[startData.networkId] = entity;
         }

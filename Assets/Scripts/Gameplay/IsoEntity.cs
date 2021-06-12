@@ -31,12 +31,6 @@ namespace Dungen
             // CurrentTile = grid.StartTile;
         }
 
-        public void SetTileDirect(Vector2Int position)
-        {
-            transform.position = grid.GetTileWorldPosition(position);
-            CurrentTile = position;
-        }
-
         public void MoveOverPath(List<Tile> path)
         {
             if (moveRoutine != null)
@@ -84,6 +78,11 @@ namespace Dungen
             var pos = grid.GetTileWorldPosition(CurrentTile);
             pos.y = .5f;
             transform.position = pos;
+        }
+
+        public void SetTile(Vector2Int position)
+        {
+            SetTile(grid.GetTileFromPosition(position));
         }
 
         private static Vector2Int GetMoveVector(MoveDirection dir)

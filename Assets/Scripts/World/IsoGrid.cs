@@ -94,14 +94,18 @@ namespace Dungen.World
             return cells;
         }
 
+        public Tile GetTileFromPosition(Vector2Int position)
+        {
+            return tiles[position.x + position.y * settings.sizeY];
+        }
+
         public List<Tile> GetTilesFromPositions(List<Vector2Int> positions)
         {
             var tiles = new List<Tile>(positions.Count);
 
             foreach (var position in positions)
             {
-                var tile = this.tiles[position.x + position.y * settings.sizeY];
-                Assert.AreEqual(position, new Vector2Int(tile.X, tile.Y));
+                var tile = GetTileFromPosition(position);
 
                 tiles.Add(tile);
             }

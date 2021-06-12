@@ -118,7 +118,7 @@ namespace Dungen
 
         public void InitializeFromNetwork(PlayerStartData data)
         {
-            playerEntity.SetTileDirect(data.position);
+            playerEntity.SetTile(data.position);
         }
         
 

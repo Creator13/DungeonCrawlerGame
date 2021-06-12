@@ -114,12 +114,16 @@ namespace Dungen.Netcode
                 return;
             }
 
+            var playerName = players[connection].playerInfo.name;
+            
             players.Remove(connection);
 
             server.UnmarkKeepAlive(connection);
             server.DisconnectClient(connection);
 
             PlayersUpdated?.Invoke();
+            
+            Debug.Log($"{playerName} left the game.");
 
             // Notify other players
             var leftMessage = new PlayerLeftMessage {playerId = (ushort) connection.InternalId};
