@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Dungen.Netcode;
 using Dungen.World;
 using UnityEngine;
@@ -14,6 +15,13 @@ namespace Dungen.Gameplay
 
         private readonly Dictionary<uint, NetworkedBehavior> behaviors = new Dictionary<uint, NetworkedBehavior>();
 
+        [SerializeField] private List<uint> ids;
+
+        private void Update()
+        {
+            ids = behaviors.Keys.ToList();
+        }
+
         public void RegisterEntity(NetworkedBehavior behavior, uint networkId)
         {
             behaviors[networkId] = behavior;
@@ -26,15 +34,15 @@ namespace Dungen.Gameplay
             obj.InitializeFromNetwork(position);
 
             obj.NetworkId = networkId;
-            obj.playerName = gameController.Players[networkId].name;
-            obj.name = obj.playerName;
+            obj.name = string.IsNullOrEmpty(obj.playerName) ? obj.GetType().ToString() : obj.playerName;
 
             RegisterEntity(obj, networkId);
         }
-
+        
         public void DespawnEntity(uint networkId)
         {
             var entity = behaviors[networkId];
+            
             Destroy(entity.gameObject);
             behaviors.Remove(networkId);
         }

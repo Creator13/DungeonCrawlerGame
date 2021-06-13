@@ -18,7 +18,11 @@ namespace Dungen.Netcode
             {(ushort) DungenMessage.SetTurn, typeof(SetTurnMessage)},
             {(ushort) DungenMessage.MoveActionRequest, typeof(MoveActionRequestMessage)},
             {(ushort) DungenMessage.MoveActionPerformed, typeof(MoveActionPerformedMessage)},
+            {(ushort) DungenMessage.AttackActionRequest, typeof(AttackActionRequestMessage)},
             {(ushort) DungenMessage.EnemySpawn, typeof(EnemySpawnMessage)},
+            {(ushort) DungenMessage.EnemyMove, typeof(EnemyMoveMessage)},
+            {(ushort) DungenMessage.EnemyKilled, typeof(EnemyKilledMessage)},
+            {(ushort) DungenMessage.ScoreUpdate, typeof(ScoreUpdateMessage)},
         };
     }
 
@@ -36,10 +40,11 @@ namespace Dungen.Netcode
         SetTurn,
         MoveActionRequest,
         MoveActionPerformed,
-
-        Tick,
+        AttackActionRequest,
+        EnemyKilled,
         EnemySpawn,
-        MoveEnemy
-        // World changes TODO
+        EnemyMove,
+        ScoreUpdate,
+        GameOver,
     }
 }

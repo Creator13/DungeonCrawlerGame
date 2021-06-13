@@ -9,7 +9,7 @@ namespace Dungen.World
     {
         private readonly GridGenerator generator;
         private readonly GeneratorSettings settings;
-        private readonly Cell[,] cells;
+        public readonly Cell[,] cells;
 
         private TileData[] tiles;
         public Dictionary<uint, Vector2Int> PlayerPositions { get; } = new Dictionary<uint, Vector2Int>();

@@ -168,7 +168,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   port: 1511
-  generatorSettings: {fileID: 11400000, guid: 6d0de5391989c4342aaf7c93bf2d1cab, type: 2}
   simulator: {fileID: 54891584}
 --- !u!114 &54891584
 MonoBehaviour:
@@ -183,6 +182,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings: {fileID: 11400000, guid: 6d0de5391989c4342aaf7c93bf2d1cab, type: 2}
-  timeBetweenTicks: 0.5
+  timeBetweenTicks: 1
   serverBehavior: {fileID: 54891583}
   running: 0

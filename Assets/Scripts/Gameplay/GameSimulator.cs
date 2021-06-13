@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Dungen.Netcode;
 using Dungen.World;
 using EditorUtils;
@@ -25,6 +25,8 @@ namespace Dungen.Gameplay
         public bool running;
 
         private float lastTickTime;
+
+        private int score;
 
         private List<SimulatedEnemy> enemies = new List<SimulatedEnemy>();
 
@@ -58,11 +60,12 @@ namespace Dungen.Gameplay
 
         private void DoTick()
         {
-            Debug.Log("tick");
-            if (Random.value < .2f)
+            if (Random.value < .15f)
             {
                 SpawnEnemy();
             }
+
+            MoveEnemies();
         }
 
         private void SpawnEnemy()
@@ -86,10 +89,59 @@ namespace Dungen.Gameplay
             }
 
             enemy.targetId = closestPlayer;
-            
+
             enemies.Add(enemy);
+            Grid.EnemyPositions[enemy.networkId] = position;
 
             Server.SendBroadcast(new EnemySpawnMessage {position = position, networkId = enemy.networkId});
+        }
+
+        public bool TryAttack(Vector2Int pos)
+        {
+            if (Grid.EnemyPositions.ContainsValue(pos))
+            {
+                var enemyId = Grid.EnemyPositions.First(kvp => kvp.Value == pos).Key;
+
+                enemies.Remove(enemies.First(enemy => enemy.networkId == enemyId));
+                Grid.EnemyPositions.Remove(enemyId);
+                
+                Server.SendBroadcast(new EnemyKilledMessage {networkId = enemyId});
+                AddScore(1);
+                
+                return true;
+            }
+
+            return false;
+        }
+
+        public void AddScore(int toAdd)
+        {
+            score += toAdd;
+            Server.SendBroadcast(new ScoreUpdateMessage {newScore = score});
+        }
+        
+        private void MoveEnemies()
+        {
+            foreach (var enemy in enemies)
+            {
+                if (Random.value < .35) continue;
+
+                var path = Astar.FindPathToTarget(Grid.EnemyPositions[enemy.networkId], Grid.PlayerPositions[enemy.targetId], Grid.cells);
+
+                var nextTile = path[0];
+
+                if (Grid.PlayerPositions.ContainsValue(nextTile))
+                {
+                    var player = Grid.PlayerPositions.First(kvp => kvp.Value == nextTile).Key;
+                    // TODO player ded
+                }
+                else
+                {
+                    Grid.EnemyPositions[enemy.networkId] = nextTile;
+
+                    Server.SendBroadcast(new EnemyMoveMessage {networkId = enemy.networkId, position = nextTile});
+                }
+            }
         }
     }
 }

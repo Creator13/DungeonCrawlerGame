@@ -22,7 +22,7 @@ namespace Dungen.Gameplay
         private Coroutine moveRoutine;
         public bool IsMoving { get; private set; }
 
-        public Vector2Int CurrentTile { get; private set; }
+        public Tile CurrentTile { get; private set; }
 
         public event Action MoveFinished;
 
@@ -32,9 +32,14 @@ namespace Dungen.Gameplay
             // CurrentTile = grid.StartTile;
         }
 
+        private void OnDestroy()
+        {
+            CurrentTile.RemoveEntity(this);
+        }
+
         public void MoveOverPath(Vector2Int destination)
         {
-            MoveOverPath(grid.GetTilesFromPositions(Astar.FindPathToTarget(CurrentTile, destination, grid.CellGrid)));
+            MoveOverPath(grid.GetTilesFromPositions(Astar.FindPathToTarget(CurrentTile.Data, destination, grid.CellGrid)));
         }
 
         public void MoveOverPath(List<Tile> path)
@@ -55,8 +60,6 @@ namespace Dungen.Gameplay
 
             while (enumerator.MoveNext())
             {
-                // HidePath();
-
                 SetTile(enumerator.Current);
                 yield return new WaitForSeconds(.2f);
             }
@@ -67,23 +70,27 @@ namespace Dungen.Gameplay
             IsMoving = false;
         }
 
-        public void Move(MoveDirection dir)
-        {
-            Move(GetMoveVector(dir));
-        }
-
-        public void Move(Vector2Int moveVector)
-        {
-            CurrentTile += moveVector;
-            transform.position = grid.GetTileWorldPosition(CurrentTile);
-        }
+        // public void Move(MoveDirection dir)
+        // {
+        //     Move(GetMoveVector(dir));
+        // }
+        //
+        // public void Move(Vector2Int moveVector)
+        // {
+        //     CurrentTile = grid.GetTileFromPosition(CurrentTile.Data + moveVector);
+        //     transform.position = grid.GetTileWorldPosition(CurrentTile);
+        // }
 
         public void SetTile(Tile tile)
         {
-            CurrentTile = new Vector2Int(tile.X, tile.Y);
+            if (CurrentTile) CurrentTile.RemoveEntity(this);
+            
+            CurrentTile = tile;
             var pos = grid.GetTileWorldPosition(CurrentTile);
             pos.y = .5f;
             transform.position = pos;
+            
+            tile.AddEntity(this);
         }
 
         public void SetTile(Vector2Int position)

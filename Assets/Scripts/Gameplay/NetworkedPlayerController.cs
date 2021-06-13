@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Dungen.Gameplay;
 using Dungen.Netcode;
 using Dungen.World;
 using UnityEngine;
@@ -12,6 +11,8 @@ namespace Dungen.Gameplay
     [RequireComponent(typeof(IsoEntity))]
     public class NetworkedPlayerController : NetworkedBehavior
     {
+        private enum Mode { Move, Attack }
+
         [SerializeField] private DungenGame gameController;
         [SerializeField] private IsoFollowCamera followCam;
         [SerializeField] private InputActionAsset playerInputActions;
@@ -21,8 +22,10 @@ namespace Dungen.Gameplay
 
         private Tile currentTargetedTile;
         private List<Tile> currentPath;
+        private List<Tile> currentAttackRadius;
 
         private bool hasTurn;
+        [SerializeField] private Mode mode;
 
         private void Awake()
         {
@@ -34,6 +37,8 @@ namespace Dungen.Gameplay
         private void Start()
         {
             EndTurn();
+            mode = Mode.Move;
+            currentAttackRadius = controllingEntity.grid.TilesInRadius(controllingEntity.CurrentTile, 2);
         }
 
         private void BindActions()
@@ -50,7 +55,10 @@ namespace Dungen.Gameplay
             playerInputActions["PointerClick"].performed += HandleClick;
             playerInputActions["PointerMove"].performed += HandlePointerMove;
 
-            followCam.CameraMoved += OnCameraMoved;
+            playerInputActions["SwitchToMove"].performed += SwitchToMoveMode;
+            playerInputActions["SwitchToAttack"].performed += SwitchToAttackMode;
+
+            // followCam.CameraMoved += OnCameraMoved;
         }
 
         private void OnValidate()
@@ -61,6 +69,8 @@ namespace Dungen.Gameplay
                 playerInputActions = null;
             }
         }
+
+        private void Update() { }
 
         private void OnCameraMoved()
         {
@@ -80,30 +90,115 @@ namespace Dungen.Gameplay
 
         private void HandleClick(InputAction.CallbackContext ctx)
         {
+            switch (mode)
+            {
+                case Mode.Move:
+                    HandleMoveClick();
+                    break;
+                case Mode.Attack:
+                    HandleAttackClick();
+                    break;
+            }
+        }
+
+        private void HandleAttackClick()
+        {
+            if (currentTargetedTile != null)
+            {
+                if (currentTargetedTile.ContainsEnemy)
+                {
+                    gameController.RequestAttack(currentTargetedTile.Data);
+                }
+            }
+        }
+
+        private void HandleMoveClick()
+        {
             if (currentTargetedTile != null && currentPath != null && currentPath.Count > 0 && !controllingEntity.IsMoving)
             {
-                HidePath();
                 currentTargetedTile.SetMarked(false);
-                // playerEntity.MoveOverPath(currentPath);
-                // playerEntity.MoveFinished += StartTurn;
                 gameController.RequestMove(currentTargetedTile.Data);
+                HidePath();
                 EndTurn();
             }
         }
 
+        private void SwitchToMoveMode(InputAction.CallbackContext ctx)
+        {
+            mode = Mode.Move;
+            HideRadius();
+        }
+
+        private void SwitchToAttackMode(InputAction.CallbackContext ctx)
+        {
+            currentAttackRadius = controllingEntity.grid.TilesInRadius(controllingEntity.CurrentTile, 2);
+            mode = Mode.Attack;
+            HidePath();
+            ShowRadius();
+        }
+
         private void UpdatePointerWorldPosition(Vector2 pointerScreenPos)
+        {
+            switch (mode)
+            {
+                case Mode.Move:
+                    MovePointerUpdate(pointerScreenPos);
+                    break;
+                case Mode.Attack:
+                    AttackPointerUpdate(pointerScreenPos);
+                    break;
+            }
+        }
+
+        private void AttackPointerUpdate(Vector2 pointerScreenPos)
         {
             var ray = followCam.Camera.ScreenPointToRay(pointerScreenPos);
 
             if (Physics.Raycast(ray, out var hitInfo, 100, layers))
             {
                 var tile = hitInfo.collider.GetComponent<Tile>();
+
+                if (currentAttackRadius.Contains(tile))
+                {
+                    if (currentTargetedTile) currentTargetedTile.SetMarked(false);
+                    currentTargetedTile = tile;
+                    currentTargetedTile.SetMarked(true);
+                }
+                else
+                {
+                    if (currentTargetedTile) currentTargetedTile.SetMarked(false);
+                    currentTargetedTile = null;
+                }
+            }
+            else
+            {
+                currentTargetedTile?.SetMarked(false);
+                currentTargetedTile = null;
+            }
+        }
+
+        private void MovePointerUpdate(Vector2 pointerScreenPos)
+        {
+            var ray = followCam.Camera.ScreenPointToRay(pointerScreenPos);
+
+            if (Physics.Raycast(ray, out var hitInfo, 100, layers))
+            {
+                var tile = hitInfo.collider.GetComponent<Tile>();
+
+                if (tile.ContainsEnemy)
+                {
+                    SetMarkedTile(null);
+                    ClearPath();
+                    return;
+                }
+
                 SetMarkedTile(tile);
             }
             else
             {
                 ClearPath();
                 currentTargetedTile?.SetMarked(false);
+                currentTargetedTile = null;
             }
         }
 
@@ -112,15 +207,17 @@ namespace Dungen.Gameplay
             hasTurn = true;
 
             playerInputActions.Enable();
+            HidePath();
+            HideRadius();
         }
 
         public void EndTurn()
         {
-            if (!hasTurn) return;
-
             hasTurn = false;
 
             playerInputActions.Disable();
+            HidePath();
+            HideRadius();
         }
 
 
@@ -156,6 +253,22 @@ namespace Dungen.Gameplay
             }
         }
 
+        private void ShowRadius()
+        {
+            foreach (var tile in currentAttackRadius)
+            {
+                tile.SetShowRadius(true);
+            }
+        }
+
+        private void HideRadius()
+        {
+            foreach (var tile in currentAttackRadius)
+            {
+                tile.SetShowRadius(false);
+            }
+        }
+
         private void ShowPath()
         {
             foreach (var tile in currentPath)
@@ -177,7 +290,7 @@ namespace Dungen.Gameplay
 
         private void FindPathTo(Tile targetTile)
         {
-            var playerPosition = controllingEntity.CurrentTile;
+            var playerPosition = (Vector2Int) controllingEntity.CurrentTile.Data;
             var targetPosition = new Vector2Int(targetTile.X, targetTile.Y);
 
             if (targetPosition == playerPosition) return;

@@ -39,14 +39,14 @@ namespace Dungen.Gameplay
         {
             if (!playerInputActions.enabled) playerInputActions.Enable();
 
-            var walk = playerInputActions["Walk"];
-            walk.performed += ctx =>
-            {
-                var moveVectorFloat = -ctx.ReadValue<Vector2>();
-                var moveVector = new Vector2Int((int) moveVectorFloat.normalized.x, (int) moveVectorFloat.normalized.y);
-
-                playerEntity.Move(moveVector);
-            };
+            // var walk = playerInputActions["Walk"];
+            // walk.performed += ctx =>
+            // {
+            //     var moveVectorFloat = -ctx.ReadValue<Vector2>();
+            //     var moveVector = new Vector2Int((int) moveVectorFloat.normalized.x, (int) moveVectorFloat.normalized.y);
+            //
+            //     playerEntity.Move(moveVector);
+            // };
 
             playerInputActions["PointerClick"].performed += HandleClick;
             playerInputActions["PointerMove"].performed += HandlePointerMove;
@@ -180,7 +180,7 @@ namespace Dungen.Gameplay
 
         private void FindPathTo(Tile targetTile)
         {
-            var playerPosition = playerEntity.CurrentTile;
+            var playerPosition = (Vector2Int) playerEntity.CurrentTile.Data;
             var targetPosition = new Vector2Int(targetTile.X, targetTile.Y);
 
             if (targetPosition == playerPosition) return;

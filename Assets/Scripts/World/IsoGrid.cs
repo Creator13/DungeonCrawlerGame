@@ -71,9 +71,14 @@ namespace Dungen.World
             return new Vector3(x * tileStep, transform.position.y, y * tileStep);
         }
 
-        public Vector3 GetTileWorldPosition(Vector2Int tile)
+        public Vector3 GetTileWorldPosition(Tile tile)
         {
-            return GetTileWorldPosition(tile.x, tile.y);
+            return GetTileWorldPosition(tile.X, tile.Y);
+        }
+
+        public Vector3 GetTileWorldPosition(Vector2Int pos)
+        {
+            return GetTileWorldPosition(pos.x, pos.y);
         }
 
         public Tile GetTileFromPosition(Vector2Int position)
@@ -93,6 +98,29 @@ namespace Dungen.World
             }
 
             return tiles;
+        }
+
+        public List<Tile> TilesInRadius(Tile origin, int radius)
+        {
+            var pos = (Vector2Int) origin.Data;
+
+            var tiles = new List<Vector2Int>();
+            
+            for (var x = pos.x - radius; x <= pos.x + radius; x++)
+            {
+                if (x < 0 || x >= settings.sizeX) continue;
+
+                for (var y = pos.y - radius; y <= pos.y + radius; y++)
+                {
+                    if (y < 0 || y >= settings.sizeX) continue;
+                    
+                    tiles.Add(new Vector2Int(x, y));
+                }
+            }
+
+            tiles.Remove(pos);
+
+            return GetTilesFromPositions(tiles);
         }
     }
 }

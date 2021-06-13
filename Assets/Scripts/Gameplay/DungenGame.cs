@@ -26,6 +26,8 @@ namespace Dungen.Gameplay
 
         private uint currentPlayerTurn;
         public PlayerInfo CurrentPlayerTurn => Players[currentPlayerTurn];
+        
+        public int Score { get; private set; }
 
         public Dictionary<uint, PlayerInfo> Players { get; } = new Dictionary<uint, PlayerInfo>();
 
@@ -80,7 +82,7 @@ namespace Dungen.Gameplay
             InstatiatePlayers(players);
         }
 
-        public void MovePlayer(uint id, Vector2Int newPosition)
+        public void MoveEntity(uint id, Vector2Int newPosition)
         {
             entityManager.MoveEntity(id, newPosition);
         }
@@ -89,6 +91,12 @@ namespace Dungen.Gameplay
         {
             var moveRequest = new MoveActionRequestMessage {newPosition = newPosition};
             Client.SendPackedMessage(moveRequest);
+        }
+
+        public void RequestAttack(Vector2Int enemyPosition)
+        {
+            var attackRequest = new AttackActionRequestMessage {attackPosition = enemyPosition};
+            Client.SendPackedMessage(attackRequest);
         }
 
         public void SetTurn(uint playerId)
@@ -108,6 +116,16 @@ namespace Dungen.Gameplay
         public void SpawnEnemy(uint id, Vector2Int position)
         {
             entityManager.SpawnEntity(entityManager.enemyPrefab, id, position);
+        }
+
+        public void RemoveEntity(uint id)
+        {
+            entityManager.DespawnEntity(id);
+        }
+
+        public void UpdateScore(int newScore)
+        {
+            Score = newScore;
         }
 
         private void GenerateWorld()

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Dungen.Gameplay;
-using Dungen.World;
 using Networking;
 using Unity.Networking.Transport;
 using UnityEngine;
@@ -19,6 +18,7 @@ namespace Dungen.Netcode
                 {(ushort) DungenMessage.StartRequest, HandleStartRequest},
                 {(ushort) DungenMessage.ClientReady, HandleClientReady},
                 {(ushort) DungenMessage.MoveActionRequest, HandleMoveActionRequest},
+                {(ushort) DungenMessage.AttackActionRequest, HandleAttackActionRequest},
             };
 
         private readonly Lobby lobby;
@@ -27,7 +27,7 @@ namespace Dungen.Netcode
         private uint[] playerTurns;
         private int currentPlayerTurn;
 
-        public uint CurrentPlayerTurn => playerTurns[currentPlayerTurn];
+        public uint CurrentTurnPlayerId => playerTurns[currentPlayerTurn];
         public bool GameStarted { get; private set; }
 
         public DungenServer(ushort port, GameSimulator simulator) : base(port, MessageInfo.dungenTypeMap)
@@ -89,7 +89,7 @@ namespace Dungen.Netcode
 
             var playerId = lobby.GetNetworkIdOfConnection(connection);
 
-            if (playerId != CurrentPlayerTurn) return;
+            if (playerId != CurrentTurnPlayerId) return;
 
             if (simulator.Grid.SetPlayer(playerId, request.newPosition))
             {
@@ -102,6 +102,18 @@ namespace Dungen.Netcode
             }
 
             MoveNextTurn();
+        }
+
+        private void HandleAttackActionRequest(NetworkConnection connection, MessageHeader header)
+        {
+            var request = (AttackActionRequestMessage) header;
+
+            if (lobby.GetNetworkIdOfConnection(connection) != CurrentTurnPlayerId) return;
+
+            if (simulator.TryAttack(request.attackPosition))
+            {
+                MoveNextTurn();
+            }
         }
 
         private void SendStartData()
