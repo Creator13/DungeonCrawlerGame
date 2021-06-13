@@ -1,4 +1,5 @@
-﻿using Dungen.World;
+﻿using Dungen.Gameplay;
+using Dungen.World;
 using UnityEngine;
 
 namespace Dungen.Netcode
@@ -10,9 +11,9 @@ namespace Dungen.Netcode
 
         public uint NetworkId { get; set; }
 
-        public void InitializeFromNetwork(PlayerStartData data)
+        public void InitializeFromNetwork(Vector2Int position)
         {
-            controllingEntity.SetTile(data.position);
+            controllingEntity.SetTile(position);
         }
 
         public void Move(Vector2Int to)

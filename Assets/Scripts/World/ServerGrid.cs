@@ -9,10 +9,11 @@ namespace Dungen.World
     {
         private readonly GridGenerator generator;
         private readonly GeneratorSettings settings;
+        private readonly Cell[,] cells;
 
         private TileData[] tiles;
-        private Cell[,] cells;
-        private Dictionary<uint, Vector2Int> playerPositions = new Dictionary<uint, Vector2Int>();
+        public Dictionary<uint, Vector2Int> PlayerPositions { get; } = new Dictionary<uint, Vector2Int>();
+        public Dictionary<uint, Vector2Int> EnemyPositions { get; }= new Dictionary<uint, Vector2Int>();
 
         public ServerGrid(GeneratorSettings settings)
         {
@@ -25,10 +26,10 @@ namespace Dungen.World
 
         public bool SetPlayer(uint networkId, Vector2Int newPosition)
         {
-            var hasPath = Astar.HasPath(playerPositions[networkId], newPosition, cells);
+            var hasPath = Astar.HasPath(PlayerPositions[networkId], newPosition, cells);
             if (hasPath)
             {
-                playerPositions[networkId] = newPosition;
+                PlayerPositions[networkId] = newPosition;
             }
 
             return hasPath;
@@ -36,7 +37,7 @@ namespace Dungen.World
 
         public void InitializePlayer(PlayerStartData playerData)
         {
-            playerPositions[playerData.networkId] = playerData.position;
+            PlayerPositions[playerData.networkId] = playerData.position;
         }
     }
 }

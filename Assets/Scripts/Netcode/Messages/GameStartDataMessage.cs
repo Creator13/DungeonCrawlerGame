@@ -1,6 +1,7 @@
 ﻿using Networking;
 using Unity.Networking.Transport;
 using UnityEngine;
+using Utils;
 
 namespace Dungen.Netcode
 {
@@ -24,8 +25,7 @@ namespace Dungen.Netcode
             foreach (var data in playerData)
             {
                 writer.WriteUInt(data.networkId);
-                writer.WriteInt(data.position.x);
-                writer.WriteInt(data.position.y);
+                writer.WriteVector2Int(data.position);
             }
         }
 
@@ -40,8 +40,7 @@ namespace Dungen.Netcode
             for (var i = 0; i < count; i++)
             {
                 playerData[i].networkId = reader.ReadUInt();
-                playerData[i].position.x = reader.ReadInt();
-                playerData[i].position.y = reader.ReadInt();
+                playerData[i].position = reader.ReadVector2Int();
             }
         }
     }

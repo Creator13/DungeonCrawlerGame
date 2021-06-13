@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using EditorUtils;
 
-namespace Dungen
+namespace Dungen.Gameplay
 {
     [RequireComponent(typeof(IsoEntity))]
     public class PlayerController : MonoBehaviour

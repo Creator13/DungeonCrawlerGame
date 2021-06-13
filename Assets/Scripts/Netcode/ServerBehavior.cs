@@ -1,38 +1,40 @@
-﻿using Dungen.World;
+﻿using Dungen.Gameplay;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Dungen.Netcode
 {
     public class ServerBehavior : MonoBehaviour
     {
         [SerializeField] private ushort port = 1511;
-        [SerializeField] private GeneratorSettings generatorSettings;
+        [SerializeField] private GameSimulator simulator;
 
-        private DungenServer server;
+        public DungenServer Server { get; private set; }
 
         private void Awake()
         {
-            server = new DungenServer(port, generatorSettings);
+            Assert.IsNotNull(simulator);
+            Server = new DungenServer(port, simulator);
         }
 
         private void Start()
         {
-            server?.Start();
+            Server?.Start();
         }
 
         private void Update()
         {
-            server?.Update();
+            Server?.Update();
         }
 
         private void OnDisable()
         {
-            server?.Stop();
+            Server?.Stop();
         }
 
         private void OnDestroy()
         {
-            server?.Stop();
+            Server?.Stop();
         }
     }
 }

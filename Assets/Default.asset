@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa8e2b3e5d434350a90d98971f2cf791, type: 3}
   m_Name: Default
   m_EditorClassIdentifier: 
-  sizeX: 10
-  sizeY: 10
+  sizeX: 15
+  sizeY: 15
   useLabels: 1
   tileLabel: {fileID: 1945484021183377887, guid: d676463dcd262384fb02aab5de07f48d, type: 3}
   tilePrefab: {fileID: 905299487788739531, guid: a05ce72c2b874f648878cd0bf6a637f8, type: 3}

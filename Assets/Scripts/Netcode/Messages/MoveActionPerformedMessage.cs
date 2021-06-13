@@ -1,6 +1,7 @@
 ﻿using Networking;
 using Unity.Networking.Transport;
 using UnityEngine;
+using Utils;
 
 namespace Dungen.Netcode
 {
@@ -16,8 +17,7 @@ namespace Dungen.Netcode
             base.SerializeObject(ref writer);
 
             writer.WriteUInt(networkId);
-            writer.WriteInt(newPosition.x);
-            writer.WriteInt(newPosition.y);
+            writer.WriteVector2Int(newPosition);
         }
 
         public override void DeserializeObject(ref DataStreamReader reader)
@@ -25,10 +25,7 @@ namespace Dungen.Netcode
             base.DeserializeObject(ref reader);
 
             networkId = reader.ReadUInt();
-
-            newPosition = new Vector2Int();
-            newPosition.x = reader.ReadInt();
-            newPosition.y = reader.ReadInt();
+            newPosition = reader.ReadVector2Int();
         }
     }
 }

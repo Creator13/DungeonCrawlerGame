@@ -194,6 +194,11 @@ namespace EditorUtils
         private static int CalcHScore(Vector2Int from, Vector2Int to)
         {
             // Using manhattan distance as heuristic
+            return ManhattanDistance(from, to);
+        }
+
+        public static int ManhattanDistance(Vector2Int from, Vector2Int to)
+        {
             return Mathf.Abs(to.x - from.x) + Mathf.Abs(to.y - from.y);
         }
 

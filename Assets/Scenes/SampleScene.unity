@@ -2218,6 +2218,7 @@ MonoBehaviour:
   gameController: {fileID: 1309739077}
   grid: {fileID: 2039601331}
   remotePlayerPrefab: {fileID: 4146866149442222460, guid: 3cb0444a73809474d9e1831c34f86fb0, type: 3}
+  enemyPrefab: {fileID: 3950284703251751030, guid: a408b0e973554124180774a08cb5542e, type: 3}
 --- !u!1 &1342402214
 GameObject:
   m_ObjectHideFlags: 0
@@ -4396,7 +4397,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 3e-45, y: 1.8866e-41, z: 6e-44, w: 1e-45}
+  m_BoundingSphereOverride: {x: 2.4257473e-29, y: 2.2e-44, z: 2.4405384e-30, w: 9.1858e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0

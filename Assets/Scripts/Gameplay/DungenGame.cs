@@ -97,22 +97,17 @@ namespace Dungen.Gameplay
 
             if (playerId == Client.OwnNetworkId)
             {
-                StartTurn();
+                ownPlayer.StartTurn();
             }
             else
             {
-                EndTurn();
+                ownPlayer.EndTurn();
             }
         }
 
-        public void StartTurn()
+        public void SpawnEnemy(uint id, Vector2Int position)
         {
-            ownPlayer.StartTurn();
-        }
-
-        public void EndTurn()
-        {
-            ownPlayer.EndTurn();
+            entityManager.SpawnEntity(entityManager.enemyPrefab, id, position);
         }
 
         private void GenerateWorld()
@@ -129,12 +124,12 @@ namespace Dungen.Gameplay
                 if (playerStartData.networkId == Client.OwnNetworkId)
                 {
                     ownPlayer.gameObject.SetActive(true);
-                    ownPlayer.InitializeFromNetwork(playerStartData);
+                    ownPlayer.InitializeFromNetwork(playerStartData.position);
                     entityManager.RegisterEntity(ownPlayer, Client.OwnNetworkId);
                     continue;
                 }
 
-                entityManager.SpawnEntity(entityManager.remotePlayerPrefab, playerStartData);
+                entityManager.SpawnEntity(entityManager.remotePlayerPrefab, playerStartData.networkId, playerStartData.position);
             }
         }
 

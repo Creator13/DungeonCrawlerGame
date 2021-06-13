@@ -169,6 +169,8 @@ namespace Networking
 
         public void SendUnicast(NetworkConnection connection, MessageHeader header, bool reliable = true)
         {
+            jobHandle.Complete();
+            
             var result = driver.BeginSend(reliable ? pipeline : NetworkPipeline.Null, connection, out var writer);
             if (result == 0)
             {
@@ -179,6 +181,8 @@ namespace Networking
 
         public void SendBroadcast(MessageHeader header, NetworkConnection toExclude = default, bool reliable = true)
         {
+            jobHandle.Complete();
+            
             for (var i = 0; i < connections.Length; i++)
             {
                 if (!connections[i].IsCreated || connections[i] == toExclude) continue;

@@ -15,6 +15,7 @@ namespace Dungen.Gameplay.States
             blackboard.ui.GameHudView.gameObject.SetActive(true);
 
             blackboard.gameController.Client.AddHandler(DungenMessage.MoveActionPerformed, HandleMoveActionPerformed);
+            blackboard.gameController.Client.AddHandler(DungenMessage.EnemySpawn, HandleEnemySpawn);
             blackboard.gameController.Client.AddHandler(DungenMessage.SetTurn, HandleSetTurn);
         }
 
@@ -25,6 +26,7 @@ namespace Dungen.Gameplay.States
             blackboard.ui.GameHudView.gameObject.SetActive(false);
 
             blackboard.gameController.Client.RemoveHandler(DungenMessage.MoveActionPerformed, HandleMoveActionPerformed);
+            blackboard.gameController.Client.RemoveHandler(DungenMessage.EnemySpawn, HandleEnemySpawn);
             blackboard.gameController.Client.RemoveHandler(DungenMessage.SetTurn, HandleSetTurn);
         }
 
@@ -40,6 +42,13 @@ namespace Dungen.Gameplay.States
             var msg = (SetTurnMessage) header;
 
             blackboard.gameController.SetTurn(msg.playerId);
+        }
+
+        private void HandleEnemySpawn(MessageHeader header)
+        {
+            var msg = (EnemySpawnMessage) header;
+            
+            blackboard.gameController.SpawnEnemy(msg.networkId, msg.position);
         }
     }
 }

@@ -5,7 +5,7 @@ using Dungen.World;
 using UnityEngine;
 using EditorUtils;
 
-namespace Dungen
+namespace Dungen.Gameplay
 {
     public class IsoEntity : MonoBehaviour
     {

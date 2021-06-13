@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Dungen.Gameplay;
 using Dungen.World;
 using Networking;
 using Unity.Networking.Transport;
@@ -20,21 +21,19 @@ namespace Dungen.Netcode
                 {(ushort) DungenMessage.MoveActionRequest, HandleMoveActionRequest},
             };
 
-        private readonly GeneratorSettings generatorSettings;
         private readonly Lobby lobby;
-        private readonly ServerGrid grid;
+        private readonly GameSimulator simulator;
 
         private uint[] playerTurns;
         private int currentPlayerTurn;
 
+        public uint CurrentPlayerTurn => playerTurns[currentPlayerTurn];
         public bool GameStarted { get; private set; }
 
-        public DungenServer(ushort port, GeneratorSettings generatorSettings) : base(port, MessageInfo.dungenTypeMap)
+        public DungenServer(ushort port, GameSimulator simulator) : base(port, MessageInfo.dungenTypeMap)
         {
             lobby = new Lobby(this, 4);
-            this.generatorSettings = generatorSettings;
-
-            grid = new ServerGrid(generatorSettings);
+            this.simulator = simulator;
         }
 
         private void HandleStartRequest(NetworkConnection connection, MessageHeader header)
@@ -90,7 +89,9 @@ namespace Dungen.Netcode
 
             var playerId = lobby.GetNetworkIdOfConnection(connection);
 
-            if (grid.SetPlayer(playerId, request.newPosition))
+            if (playerId != CurrentPlayerTurn) return;
+
+            if (simulator.Grid.SetPlayer(playerId, request.newPosition))
             {
                 var response = new MoveActionPerformedMessage {
                     networkId = playerId,
@@ -111,11 +112,11 @@ namespace Dungen.Netcode
             foreach (var player in lobby.Players)
             {
                 playerData[i] = new PlayerStartData {
-                    position = new Vector2Int(Random.Range(0, generatorSettings.sizeX), Random.Range(0, generatorSettings.sizeY)),
+                    position = simulator.GetRandomFreeGridPosition(),
                     networkId = player.networkId
                 };
 
-                grid.InitializePlayer(playerData[i]);
+                simulator.Grid.InitializePlayer(playerData[i]);
 
                 i++;
             }
@@ -134,7 +135,7 @@ namespace Dungen.Netcode
             GameStarted = true;
 
             SendBroadcast(new GameStartingMessage());
-
+            
             MoveNextTurn();
         }
 

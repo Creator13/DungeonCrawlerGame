@@ -10,6 +10,7 @@ namespace Dungen.Gameplay
         [SerializeField] private DungenGame gameController;
         [SerializeField] private IsoGrid grid;
         public RemotePlayer remotePlayerPrefab;
+        public NetworkedBehavior enemyPrefab;
 
         private readonly Dictionary<uint, NetworkedBehavior> behaviors = new Dictionary<uint, NetworkedBehavior>();
 
@@ -18,17 +19,17 @@ namespace Dungen.Gameplay
             behaviors[networkId] = behavior;
         }
 
-        public void SpawnEntity(NetworkedBehavior prototype, PlayerStartData startData)
+        public void SpawnEntity(NetworkedBehavior prototype, uint networkId, Vector2Int position)
         {
             var obj = Instantiate(prototype);
             obj.SetGrid(grid);
-            obj.InitializeFromNetwork(startData);
+            obj.InitializeFromNetwork(position);
 
-            obj.NetworkId = startData.networkId;
-            obj.playerName = gameController.Players[startData.networkId].name;
+            obj.NetworkId = networkId;
+            obj.playerName = gameController.Players[networkId].name;
             obj.name = obj.playerName;
 
-            RegisterEntity(obj, startData.networkId);
+            RegisterEntity(obj, networkId);
         }
 
         public void DespawnEntity(uint networkId)
