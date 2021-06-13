@@ -20,6 +20,7 @@ namespace Dungen.Gameplay.States
             blackboard.gameController.Client.AddHandler(DungenMessage.EnemyKilled, HandleEnemyKilled);
             blackboard.gameController.Client.AddHandler(DungenMessage.SetTurn, HandleSetTurn);
             blackboard.gameController.Client.AddHandler(DungenMessage.ScoreUpdate, HandleScoreUpdate);
+            blackboard.gameController.Client.AddHandler(DungenMessage.GameOver, HandleGameOver);
         }
 
         public override void Exit()
@@ -34,6 +35,9 @@ namespace Dungen.Gameplay.States
             blackboard.gameController.Client.RemoveHandler(DungenMessage.EnemyKilled, HandleEnemyKilled);
             blackboard.gameController.Client.RemoveHandler(DungenMessage.SetTurn, HandleSetTurn);
             blackboard.gameController.Client.RemoveHandler(DungenMessage.ScoreUpdate, HandleScoreUpdate);
+            blackboard.gameController.Client.RemoveHandler(DungenMessage.GameOver, HandleGameOver);
+            
+            blackboard.gameController.DestroyWorld();
         }
 
         private void HandleMoveActionPerformed(MessageHeader header)
@@ -76,6 +80,19 @@ namespace Dungen.Gameplay.States
             var msg = (ScoreUpdateMessage) header;
 
             blackboard.gameController.UpdateScore(msg.newScore);
+        }
+
+        private void HandleGameOver(MessageHeader header)
+        {
+            var msg = (GameOverMessage) header;
+            
+            blackboard.gameController.UpdateScore(msg.finalScore);
+            blackboard.gameController.RequestStateChange<GameOverState>();
+        }
+
+        public override bool ValidateTransition(State<DungenBlackboard> newState)
+        {
+            return newState is GameOverState || newState is GameLeftState;
         }
     }
 }

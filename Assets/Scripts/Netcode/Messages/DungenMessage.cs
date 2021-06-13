@@ -23,6 +23,7 @@ namespace Dungen.Netcode
             {(ushort) DungenMessage.EnemyMove, typeof(EnemyMoveMessage)},
             {(ushort) DungenMessage.EnemyKilled, typeof(EnemyKilledMessage)},
             {(ushort) DungenMessage.ScoreUpdate, typeof(ScoreUpdateMessage)},
+            {(ushort) DungenMessage.GameOver, typeof(GameOverMessage)},
         };
     }
 

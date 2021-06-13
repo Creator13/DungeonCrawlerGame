@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Dungen.Gameplay.States;
 using Dungen.Netcode;
 using Dungen.UI;
@@ -82,6 +83,15 @@ namespace Dungen.Gameplay
             InstatiatePlayers(players);
         }
 
+        public void DestroyWorld()
+        {
+            entityManager.UnregisterEntity(ownPlayer.NetworkId);
+            ownPlayer.gameObject.SetActive(false);
+            
+            grid.gameObject.SetActive(false);
+            entityManager.DespawnAll();
+        }
+        
         public void MoveEntity(uint id, Vector2Int newPosition)
         {
             entityManager.MoveEntity(id, newPosition);

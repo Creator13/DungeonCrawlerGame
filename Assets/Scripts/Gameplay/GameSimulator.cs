@@ -133,7 +133,7 @@ namespace Dungen.Gameplay
                 if (Grid.PlayerPositions.ContainsValue(nextTile))
                 {
                     var player = Grid.PlayerPositions.First(kvp => kvp.Value == nextTile).Key;
-                    // TODO player ded
+                    GameOver();
                 }
                 else
                 {
@@ -142,6 +142,13 @@ namespace Dungen.Gameplay
                     Server.SendBroadcast(new EnemyMoveMessage {networkId = enemy.networkId, position = nextTile});
                 }
             }
+        }
+
+        private void GameOver()
+        {
+            Server.EndGame();
+            
+            Server.SendBroadcast(new GameOverMessage {finalScore = score});
         }
     }
 }

@@ -26,6 +26,11 @@ namespace Dungen.Gameplay
         {
             behaviors[networkId] = behavior;
         }
+        
+        public void UnregisterEntity(uint networkId)
+        {
+            behaviors.Remove(networkId);
+        }
 
         public void SpawnEntity(NetworkedBehavior prototype, uint networkId, Vector2Int position)
         {
@@ -50,6 +55,16 @@ namespace Dungen.Gameplay
         public void MoveEntity(uint id, Vector2Int to)
         {
             behaviors[id].Move(to);
+        }
+
+        public void DespawnAll()
+        {
+            foreach (var id in behaviors.Keys)
+            {
+                Destroy(behaviors[id].gameObject);
+            }
+            
+            behaviors.Clear();
         }
     }
 }

@@ -151,6 +151,11 @@ namespace Dungen.Netcode
             MoveNextTurn();
         }
 
+        public void EndGame()
+        {
+            GameStarted = false;
+        }
+
         private void MoveNextTurn()
         {
             if (playerTurns == null)

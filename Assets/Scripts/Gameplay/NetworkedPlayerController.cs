@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dungen.Netcode;
 using Dungen.World;
@@ -72,7 +73,7 @@ namespace Dungen.Gameplay
 
         private void Update() { }
 
-        private void OnCameraMoved()
+        private void RecalculatePath()
         {
             if (controllingEntity.IsMoving) return;
 
@@ -207,8 +208,18 @@ namespace Dungen.Gameplay
             hasTurn = true;
 
             playerInputActions.Enable();
-            HidePath();
-            HideRadius();
+
+            switch (mode)
+            {
+                case Mode.Move:
+                    HideRadius();
+                    RecalculatePath();
+                    break;
+                case Mode.Attack:
+                    HidePath();
+                    ShowRadius();
+                    break;
+            }
         }
 
         public void EndTurn()
@@ -263,6 +274,8 @@ namespace Dungen.Gameplay
 
         private void HideRadius()
         {
+            if (currentAttackRadius == null) return;
+
             foreach (var tile in currentAttackRadius)
             {
                 tile.SetShowRadius(false);
