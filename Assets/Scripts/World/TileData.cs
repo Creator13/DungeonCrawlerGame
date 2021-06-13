@@ -1,4 +1,6 @@
-﻿namespace Dungen.World
+﻿using UnityEngine;
+
+namespace Dungen.World
 {
     public readonly struct TileData
     {
@@ -9,6 +11,11 @@
         {
             this.x = x;
             this.y = y;
+        }
+
+        public static implicit operator Vector2Int(TileData data)
+        {
+            return new Vector2Int(data.x, data.y);
         }
     }
 }

@@ -28,6 +28,7 @@ namespace Dungen.Netcode
         public PlayerInfo[] Players => players.Values.Select(p => p.playerInfo).ToArray();
         public IEnumerable<NetworkConnection> PlayerConnections => players.Keys;
         public bool Full => PlayerCount >= MaxPlayers;
+        public bool AllPlayersReady => players.Values.All(p => p.ready);
 
         public Lobby(DungenServer server, int capacity)
         {
@@ -47,12 +48,12 @@ namespace Dungen.Netcode
             }
 
             var networkId = DungenServer.NextNetworkId;
-            
+
             HandshakeResponseMessage handshakeResponse;
             if (!Full)
             {
                 var playerInfo = new PlayerInfo(networkId, handshake.requestedPlayerName);
-                
+
                 handshakeResponse = new HandshakeResponseMessage {
                     status = HandshakeResponseMessage.HandshakeResponseStatus.Accepted,
                     playerName = handshake.requestedPlayerName,
@@ -91,6 +92,11 @@ namespace Dungen.Netcode
             server.SendUnicast(connection, handshakeResponse);
         }
 
+        public uint GetNetworkIdOfConnection(NetworkConnection connection)
+        {
+            return players[connection].playerInfo.networkId;
+        }
+
         public void SetReadyStatus(NetworkConnection connection, bool ready)
         {
             players[connection].ready = true;
@@ -115,14 +121,14 @@ namespace Dungen.Netcode
             }
 
             var playerName = players[connection].playerInfo.name;
-            
+
             players.Remove(connection);
 
             server.UnmarkKeepAlive(connection);
             server.DisconnectClient(connection);
 
             PlayersUpdated?.Invoke();
-            
+
             Debug.Log($"{playerName} left the game.");
 
             // Notify other players

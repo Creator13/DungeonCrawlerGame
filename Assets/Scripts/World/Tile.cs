@@ -14,12 +14,12 @@ namespace Dungen.World
         private new MeshRenderer renderer;
 
         private Color startColor;
-        private TileData data;
 
-        private List<IEntity> entities;
+        private List<IsoEntity> entities;
 
-        public int X => data.x;
-        public int Y => data.y;
+        public int X => Data.x;
+        public int Y => Data.y;
+        public TileData Data { get; private set; }
 
         private void Awake()
         {
@@ -36,7 +36,7 @@ namespace Dungen.World
 
         public void Initialize(TileData data)
         {
-            this.data = data;
+            Data = data;
         }
 
         public void SetMarked(bool marked)
@@ -53,12 +53,12 @@ namespace Dungen.World
             renderer.SetPropertyBlock(propertyBlock);
         }
 
-        public void AddEntity(IEntity entity)
+        public void AddEntity(IsoEntity entity)
         {
             entities.Add(entity);
         }
 
-        public void RemoveEntity(IEntity entity)
+        public void RemoveEntity(IsoEntity entity)
         {
             entities.Remove(entity);
         }

@@ -1930,9 +1930,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1159030075}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7604521ff4c4c8ab4e655444956ffa7, type: 3}
+  m_Script: {fileID: 11500000, guid: bafa9773aff54690b19ece993f6991d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerName: 
+  gameController: {fileID: 1309739077}
   followCam: {fileID: 1687258587}
   playerInputActions: {fileID: -944628639613478452, guid: 9addfd47f43e62a409b540c939a17cd6, type: 3}
   layers:
@@ -2079,7 +2081,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameController: {fileID: 1309739077}
   grid: {fileID: 2039601331}
-  networkedPlayerPrefab: {fileID: 4146866149442222460, guid: 3cb0444a73809474d9e1831c34f86fb0, type: 3}
+  remotePlayerPrefab: {fileID: 4146866149442222460, guid: 3cb0444a73809474d9e1831c34f86fb0, type: 3}
 --- !u!1 &1342402214
 GameObject:
   m_ObjectHideFlags: 0

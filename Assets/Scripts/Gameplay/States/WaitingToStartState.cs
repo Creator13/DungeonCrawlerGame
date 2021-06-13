@@ -20,6 +20,7 @@ namespace Dungen.Gameplay.States
 
             blackboard.gameController.Client.AddHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
             blackboard.gameController.Client.AddHandler(DungenMessage.GameStartData, HandleGameStartData);
+            blackboard.gameController.Client.AddHandler(DungenMessage.GameStarting, HandleGameStarting);
             View.gameObject.SetActive(true);
         }
 
@@ -29,7 +30,13 @@ namespace Dungen.Gameplay.States
 
             blackboard.gameController.Client.RemoveHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
             blackboard.gameController.Client.RemoveHandler(DungenMessage.GameStartData, HandleGameStartData);
+            blackboard.gameController.Client.RemoveHandler(DungenMessage.GameStarting, HandleGameStarting);
             View.gameObject.SetActive(false);
+        }
+
+        public override bool ValidateTransition(State<DungenBlackboard> newState)
+        {
+            return newState is GameActiveState;
         }
 
         private void HandleStartRequestResponse(MessageHeader header)
@@ -49,13 +56,13 @@ namespace Dungen.Gameplay.States
             blackboard.gameController.InitializeWorld(dataMessage.playerData);
             
             blackboard.gameController.Client.SendPackedMessage(new ClientReadyMessage());
-            
-            blackboard.gameController.RequestStateChange<GameActiveState>();
         }
 
-        public override bool ValidateTransition(State<DungenBlackboard> newState)
+        private void HandleGameStarting(MessageHeader header)
         {
-            return newState is GameActiveState;
+            var _ = (GameStartingMessage) header;
+            
+            blackboard.gameController.RequestStateChange<GameActiveState>();
         }
     }
 }

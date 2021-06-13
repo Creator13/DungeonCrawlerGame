@@ -15,7 +15,7 @@ namespace Dungen.Gameplay
         private FiniteStateMachine<DungenBlackboard> GameStateMachine { get; set; }
         private DungenBlackboard blackboard;
 
-        [SerializeField] private PlayerController ownPlayer;
+        [SerializeField] private NetworkedPlayerController ownPlayer;
         [SerializeField] private UIManager uiManager;
         [SerializeField] private ClientBehaviour clientBehaviour;
         [SerializeField] private GeneratorSettings generatorSettings;
@@ -77,6 +77,27 @@ namespace Dungen.Gameplay
             InstatiatePlayers(players);
         }
 
+        public void MovePlayer(uint id, Vector2Int newPosition)
+        {
+            entityManager.MoveEntity(id, newPosition);
+        }
+
+        public void RequestMove(Vector2Int newPosition)
+        {
+            var moveRequest = new MoveActionRequestMessage {newPosition = newPosition};
+            Client.SendPackedMessage(moveRequest);
+        }
+
+        public void StartTurn()
+        {   
+            ownPlayer.StartTurn();
+        }
+
+        public void EndTurn()
+        {
+            ownPlayer.EndTurn();
+        }
+
         private void GenerateWorld()
         {
             var generator = new GridGenerator(generatorSettings);
@@ -92,10 +113,11 @@ namespace Dungen.Gameplay
                 {
                     ownPlayer.gameObject.SetActive(true);
                     ownPlayer.InitializeFromNetwork(playerStartData);
+                    entityManager.RegisterEntity(ownPlayer, Client.OwnNetworkId);
                     continue;
                 }
 
-                entityManager.SpawnEntity(entityManager.networkedPlayerPrefab, playerStartData);
+                entityManager.SpawnEntity(entityManager.remotePlayerPrefab, playerStartData);
             }
         }
 

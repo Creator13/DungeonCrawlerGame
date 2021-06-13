@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using Dungen.Netcode;
 using Dungen.World;
+using Unity.Networking.Transport;
 using UnityEngine;
+using Utils;
 
 namespace Dungen.Gameplay
 {
@@ -9,26 +11,38 @@ namespace Dungen.Gameplay
     {
         [SerializeField] private DungenGame gameController;
         [SerializeField] private IsoGrid grid;
-        public NetworkedPlayer networkedPlayerPrefab;
+        public RemotePlayer remotePlayerPrefab;
 
-        private readonly Dictionary<uint, NetworkedEntity> entities = new Dictionary<uint, NetworkedEntity>();
-        
-        public void SpawnEntity(NetworkedEntity protoEntity, PlayerStartData startData)
+        private readonly Dictionary<uint, NetworkedBehavior> behaviors = new Dictionary<uint, NetworkedBehavior>();
+
+        public void RegisterEntity(NetworkedBehavior behavior, uint networkId)
         {
-            var entity = Instantiate(protoEntity);
-            entity.grid = grid;
-            entity.NetworkId = startData.networkId;
-            entity.name = gameController.Players[startData.networkId].name;
-            entity.SetTile(startData.position);
+            behaviors[networkId] = behavior;
+        }
 
-            entities[startData.networkId] = entity;
+        public void SpawnEntity(NetworkedBehavior prototype, PlayerStartData startData)
+        {
+            var obj = Instantiate(prototype);
+            obj.SetGrid(grid);
+            obj.InitializeFromNetwork(startData);
+            
+            obj.NetworkId = startData.networkId;
+            obj.playerName = gameController.Players[startData.networkId].name;
+            obj.name = obj.playerName;
+
+            RegisterEntity(obj, startData.networkId);
         }
 
         public void DespawnEntity(uint networkId)
         {
-            var entity = entities[networkId];
+            var entity = behaviors[networkId];
             Destroy(entity.gameObject);
-            entities.Remove(networkId);
+            behaviors.Remove(networkId);
+        }
+
+        public void MoveEntity(uint id, Vector2Int to)
+        {
+            behaviors[id].Move(to);
         }
     }
 }

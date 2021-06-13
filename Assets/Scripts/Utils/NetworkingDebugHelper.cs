@@ -1,9 +1,9 @@
 ﻿using System;
-using Dungen.Netcode;
 using UnityEditor;
 
 namespace Utils
 {
+#if UNITY_EDITOR
     public static class NetworkingDebugHelper
     {
         private const string TOGGLE_SERVER_DEBUG_MENU = "Dungen/Debug server";
@@ -23,10 +23,10 @@ namespace Utils
             else
             {
                 var defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
-                
+
                 var index = defines.IndexOf(DEBUG_DEFINE);
                 if (index > 0) index -= 1;
-                
+
                 var lengthToRemove = Math.Min(DEBUG_DEFINE.Length + 1, defines.Length - index);
 
                 defines = defines.Remove(index, lengthToRemove);
@@ -42,4 +42,5 @@ namespace Utils
             return true;
         }
     }
+#endif
 }

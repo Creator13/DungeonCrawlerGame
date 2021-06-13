@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Dungen.World
 {
@@ -24,6 +25,27 @@ namespace Dungen.World
             }
 
             return tiles.ToArray();
+        }
+
+        public static Cell[,] GetCellGridFromTileDataGrid(IEnumerable<TileData> tiles, int sizeX, int sizeY)
+        {
+            var cells = new Cell[sizeX, sizeY];
+
+            foreach (var tile in tiles)
+            {
+                var cell = new Cell {
+                    gridPosition = new Vector2Int(tile.x, tile.y)
+                };
+
+                if (tile.x == sizeX - 1) cell.walls |= Wall.LEFT;
+                if (tile.y == sizeY - 1) cell.walls |= Wall.DOWN;
+                if (tile.x == 0) cell.walls |= Wall.RIGHT;
+                if (tile.y == 0) cell.walls |= Wall.UP;
+
+                cells[tile.x, tile.y] = cell;
+            }
+
+            return cells;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Dungen.Gameplay;
 using Dungen.Netcode;
 using Dungen.World;
 using UnityEngine;
@@ -9,13 +10,13 @@ using Utils;
 namespace Dungen
 {
     [RequireComponent(typeof(IsoEntity))]
-    public class PlayerController : MonoBehaviour
+    public class NetworkedPlayerController : NetworkedBehavior
     {
+        [SerializeField] private DungenGame gameController;
         [SerializeField] private IsoFollowCamera followCam;
         [SerializeField] private InputActionAsset playerInputActions;
         [SerializeField] private LayerMask layers;
 
-        private IsoEntity playerEntity;
         private RaycastHit[] hitContainer;
 
         private Tile currentTargetedTile;
@@ -25,7 +26,7 @@ namespace Dungen
 
         private void Awake()
         {
-            playerEntity = GetComponent<IsoEntity>();
+            controllingEntity = GetComponent<IsoEntity>();
 
             BindActions();
         }
@@ -37,16 +38,14 @@ namespace Dungen
 
         private void BindActions()
         {
-            if (!playerInputActions.enabled) playerInputActions.Enable();
-
-            var walk = playerInputActions["Walk"];
-            walk.performed += ctx =>
-            {
-                var moveVectorFloat = -ctx.ReadValue<Vector2>();
-                var moveVector = new Vector2Int((int) moveVectorFloat.normalized.x, (int) moveVectorFloat.normalized.y);
-
-                playerEntity.Move(moveVector);
-            };
+            // var walk = playerInputActions["Walk"];
+            // walk.performed += ctx =>
+            // {
+            //     var moveVectorFloat = -ctx.ReadValue<Vector2>();
+            //     var moveVector = new Vector2Int((int) moveVectorFloat.normalized.x, (int) moveVectorFloat.normalized.y);
+            //
+            //     playerEntity.Move(moveVector);
+            // };
 
             playerInputActions["PointerClick"].performed += HandleClick;
             playerInputActions["PointerMove"].performed += HandlePointerMove;
@@ -65,7 +64,7 @@ namespace Dungen
 
         private void OnCameraMoved()
         {
-            if (playerEntity.IsMoving) return;
+            if (controllingEntity.IsMoving) return;
 
             var screenPos = playerInputActions["PointerMove"].ReadValue<Vector2>();
             UpdatePointerWorldPosition(screenPos);
@@ -81,12 +80,13 @@ namespace Dungen
 
         private void HandleClick(InputAction.CallbackContext ctx)
         {
-            if (currentTargetedTile != null && currentPath != null && currentPath.Count > 0 && !playerEntity.IsMoving)
+            if (currentTargetedTile != null && currentPath != null && currentPath.Count > 0 && !controllingEntity.IsMoving)
             {
                 HidePath();
                 currentTargetedTile.SetMarked(false);
-                playerEntity.MoveOverPath(currentPath);
-                playerEntity.MoveFinished += StartTurn;
+                // playerEntity.MoveOverPath(currentPath);
+                // playerEntity.MoveFinished += StartTurn;
+                gameController.RequestMove(currentTargetedTile.Data);
                 EndTurn();
             }
         }
@@ -116,14 +116,11 @@ namespace Dungen
 
         public void EndTurn()
         {
+            if (!hasTurn) return;
+            
             hasTurn = false;
 
             playerInputActions.Disable();
-        }
-
-        public void InitializeFromNetwork(PlayerStartData data)
-        {
-            playerEntity.SetTile(data.position);
         }
 
 
@@ -180,18 +177,18 @@ namespace Dungen
 
         private void FindPathTo(Tile targetTile)
         {
-            var playerPosition = playerEntity.CurrentTile;
+            var playerPosition = controllingEntity.CurrentTile;
             var targetPosition = new Vector2Int(targetTile.X, targetTile.Y);
 
             if (targetPosition == playerPosition) return;
 
-            var path = Astar.FindPathToTarget(playerPosition, targetPosition, playerEntity.grid.CellGrid);
+            var path = Astar.FindPathToTarget(playerPosition, targetPosition, controllingEntity.grid.CellGrid);
             if (path.Count > 0)
             {
                 // Un-show the old path
                 HidePath();
 
-                currentPath = playerEntity.grid.GetTilesFromPositions(path);
+                currentPath = controllingEntity.grid.GetTilesFromPositions(path);
 
                 ShowPath();
             }

@@ -13,18 +13,22 @@ namespace Dungen.Netcode
 
         private readonly GeneratorSettings generatorSettings;
         private readonly Lobby lobby;
+        private readonly ServerGrid grid;
 
         protected override Dictionary<ushort, ServerMessageHandler> NetworkMessageHandlers =>
             new Dictionary<ushort, ServerMessageHandler> {
                 {(ushort) DungenMessage.Handshake, lobby.AcceptConnection},
                 {(ushort) DungenMessage.StartRequest, HandleStartRequest},
-                {(ushort) DungenMessage.ClientReady, HandleClientReady}
+                {(ushort) DungenMessage.ClientReady, HandleClientReady},
+                {(ushort) DungenMessage.MoveActionRequest, HandleMoveActionRequest},
             };
 
         public DungenServer(ushort port, GeneratorSettings generatorSettings) : base(port, MessageInfo.dungenTypeMap)
         {
             lobby = new Lobby(this, 4);
             this.generatorSettings = generatorSettings;
+
+            grid = new ServerGrid(generatorSettings);
         }
 
         private void HandleStartRequest(NetworkConnection connection, MessageHeader header)
@@ -32,7 +36,7 @@ namespace Dungen.Netcode
             // Cast into throwaway to check if the message is completely valid.
             var _ = (StartRequestMessage) header;
 
-#if DUNGEN_NETWORK_DEBUG
+#if DUNGEN_NETWORK_DEBUG && UNITY_EDITOR
             SendUnicast(connection, new StartRequestResponseMessage {
                 status = StartRequestResponseMessage.StartRequestResponse.Accepted
             });
@@ -67,6 +71,28 @@ namespace Dungen.Netcode
             var msg = (ClientReadyMessage) header;
 
             lobby.SetReadyStatus(connection, true);
+
+            if (lobby.AllPlayersReady)
+            {
+                StartGame();
+            }
+        }
+
+        private void HandleMoveActionRequest(NetworkConnection connection, MessageHeader header)
+        {
+            var request = (MoveActionRequestMessage) header;
+
+            var playerId = lobby.GetNetworkIdOfConnection(connection);
+            
+            if (grid.SetPlayer(playerId, request.newPosition))
+            {
+                var response = new MoveActionPerformedMessage {
+                    networkId = playerId,
+                    newPosition = request.newPosition
+                };
+                
+                SendBroadcast(response);
+            }
         }
 
         private void SendStartData()
@@ -80,6 +106,9 @@ namespace Dungen.Netcode
                     position = new Vector2Int(Random.Range(0, generatorSettings.sizeX), Random.Range(0, generatorSettings.sizeY)),
                     networkId = player.networkId
                 };
+
+                grid.InitializePlayer(playerData[i]);
+
                 i++;
             }
 
@@ -90,6 +119,12 @@ namespace Dungen.Netcode
             SendBroadcast(startDataMessage, lobby.PlayerConnections, true);
         }
 
-        private void StartGame() { }
+        private void StartGame()
+        {
+            lobby.ClearReadyStatus();
+            
+            SendBroadcast(new GameStartingMessage());
+            SendBroadcast(new SetTurnMessage() {playerId = lobby.Players[0].networkId});
+        }
     }
 }

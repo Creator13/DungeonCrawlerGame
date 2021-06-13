@@ -76,6 +76,66 @@ namespace Utils
             return new List<Vector2Int>();
         }
 
+        public static bool HasPath(Vector2Int from, Vector2Int to, Cell[,] grid)
+        {
+            var nodeGrid = CreateNodeGrid(grid, to);
+
+            var openList = new List<Node>();
+            var closedList = new List<Node>();
+
+            // Create a node from the starting cell
+            var startNode = nodeGrid[from.x, from.y];
+            startNode.GScore = 0;
+            openList.Add(startNode);
+
+            while (openList.Count > 0)
+            {
+                // FIND NODE WITH LOWEST FSCORE
+                if (openList.Count > 1) openList = openList.OrderBy(node => node.FScore).ToList();
+                var current = openList[0];
+
+                // CHECK IF END REACHED
+                if (current.position == to)
+                {
+                    return true;
+                }
+
+                // VISIT CURRENT NODE
+                closedList.Add(current);
+                openList.Remove(current);
+
+                // GET NEIGHBOUR NODES
+                var neighbours = new List<Node>();
+                foreach (var cell in FindAvailableNeighbours(grid[current.position.x, current.position.y], grid).ToList())
+                {
+                    // Get nodes corresponding to neighbour cells
+                    neighbours.Add(nodeGrid[cell.gridPosition.x, cell.gridPosition.y]);
+                }
+
+                foreach (var node in neighbours)
+                {
+                    if (closedList.Contains(node))
+                    {
+                        continue;
+                    }
+
+                    var tentativeG = current.GScore + 1;
+
+                    if (tentativeG < node.GScore)
+                    {
+                        node.parent = current;
+                        node.GScore = tentativeG;
+                        if (!openList.Contains(node))
+                        {
+                            openList.Add(node);
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private static List<Vector2Int> BacktrackPositions(Node start, Node end)
         {
             var positions = new List<Vector2Int>();

@@ -15,6 +15,9 @@ namespace Dungen.Netcode
             {(ushort) DungenMessage.GameStarting, typeof(GameStartingMessage)},
             {(ushort) DungenMessage.PlayerJoined, typeof(PlayerJoinedMessage)},
             {(ushort) DungenMessage.PlayerLeft, typeof(PlayerLeftMessage)},
+            {(ushort) DungenMessage.SetTurn, typeof(SetTurnMessage)},
+            {(ushort) DungenMessage.MoveActionRequest, typeof(MoveActionRequestMessage)},
+            {(ushort) DungenMessage.MoveActionPerformed, typeof(MoveActionPerformedMessage)},
         };
     }
 
@@ -30,10 +33,9 @@ namespace Dungen.Netcode
         PlayerJoined,
         PlayerLeft,
         SetTurn,
-        TurnAction, // TODO specificize
-        // TurnActionConfirmed?
-        TurnActionPerformed,
-        Tick,
+        MoveActionRequest, 
+        MoveActionPerformed,
+        Tick
         // World changes TODO
     }
 }

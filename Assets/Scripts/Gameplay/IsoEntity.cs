@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Dungen.World;
 using UnityEngine;
+using Utils;
 
 namespace Dungen
 {
@@ -19,7 +20,7 @@ namespace Dungen
         public IsoGrid grid;
 
         private Coroutine moveRoutine;
-        public  bool IsMoving { get; private set; }
+        public bool IsMoving { get; private set; }
 
         public Vector2Int CurrentTile { get; private set; }
 
@@ -31,6 +32,11 @@ namespace Dungen
             // CurrentTile = grid.StartTile;
         }
 
+        public void MoveOverPath(Vector2Int destination)
+        {
+            MoveOverPath(grid.GetTilesFromPositions(Astar.FindPathToTarget(CurrentTile, destination, grid.CellGrid)));
+        }
+        
         public void MoveOverPath(List<Tile> path)
         {
             if (moveRoutine != null)

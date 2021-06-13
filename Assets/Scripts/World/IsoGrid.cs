@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -19,7 +20,7 @@ namespace Dungen.World
         public Vector2Int StartTile => new Vector2Int(settings.sizeX / 2, settings.sizeY / 2);
 
         private Cell[,] cellGrid;
-        public Cell[,] CellGrid => cellGrid ??= GetCellGrid();
+        public Cell[,] CellGrid => cellGrid ??= GridGenerator.GetCellGridFromTileDataGrid(tiles.Select(tile => tile.Data), settings.sizeX, settings.sizeY);
 
         private void Awake()
         {
@@ -71,27 +72,6 @@ namespace Dungen.World
         public Vector3 GetTileWorldPosition(Vector2Int tile)
         {
             return GetTileWorldPosition(tile.x, tile.y);
-        }
-
-        private Cell[,] GetCellGrid()
-        {
-            var cells = new Cell[settings.sizeX, settings.sizeY];
-
-            foreach (var tile in tiles)
-            {
-                var cell = new Cell {
-                    gridPosition = new Vector2Int(tile.X, tile.Y)
-                };
-
-                if (tile.X == settings.sizeX - 1) cell.walls |= Wall.LEFT;
-                if (tile.Y == settings.sizeY - 1) cell.walls |= Wall.DOWN;
-                if (tile.X == 0) cell.walls |= Wall.RIGHT;
-                if (tile.Y == 0) cell.walls |= Wall.UP;
-
-                cells[tile.X, tile.Y] = cell;
-            }
-
-            return cells;
         }
 
         public Tile GetTileFromPosition(Vector2Int position)
