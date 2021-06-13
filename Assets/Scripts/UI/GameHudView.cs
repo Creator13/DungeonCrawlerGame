@@ -9,11 +9,11 @@ namespace Dungen.UI
         [SerializeField] private DungenGame game;
 
         [SerializeField] private TMP_Text turnDisplay;
-        
+
         private void Update()
         {
             var player = game.CurrentPlayerTurn;
-            
+
             turnDisplay.SetText($"It's {(player.networkId == game.Client.OwnNetworkId ? "your" : $"{player.name}'s")} turn!");
         }
     }

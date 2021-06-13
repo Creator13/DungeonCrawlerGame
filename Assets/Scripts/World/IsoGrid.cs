@@ -20,7 +20,9 @@ namespace Dungen.World
         public Vector2Int StartTile => new Vector2Int(settings.sizeX / 2, settings.sizeY / 2);
 
         private Cell[,] cellGrid;
-        public Cell[,] CellGrid => cellGrid ??= GridGenerator.GetCellGridFromTileDataGrid(tiles.Select(tile => tile.Data), settings.sizeX, settings.sizeY);
+
+        public Cell[,] CellGrid =>
+            cellGrid ??= GridGenerator.GetCellGridFromTileDataGrid(tiles.Select(tile => tile.Data), settings.sizeX, settings.sizeY);
 
         private void Awake()
         {
@@ -38,8 +40,8 @@ namespace Dungen.World
         public void CreateGridFromTileDataArray(TileData[] tiles)
         {
             this.tiles = new Tile[tiles.Length];
-            
-            for(var i = 0; i < tiles.Length; i++)
+
+            for (var i = 0; i < tiles.Length; i++)
             {
                 this.tiles[i] = TileFromData(tiles[i]);
             }

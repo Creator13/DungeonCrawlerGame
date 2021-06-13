@@ -8,7 +8,7 @@ namespace Dungen.Netcode
         public override ushort Type => (ushort) DungenMessage.PlayerLeft;
 
         public uint playerId;
-        
+
         public override void SerializeObject(ref DataStreamWriter writer)
         {
             base.SerializeObject(ref writer);

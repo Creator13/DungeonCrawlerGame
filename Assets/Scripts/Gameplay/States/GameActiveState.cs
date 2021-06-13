@@ -11,9 +11,9 @@ namespace Dungen.Gameplay.States
         public override void Enter(FiniteStateMachine<DungenBlackboard> parent)
         {
             base.Enter(parent);
-            
+
             blackboard.ui.GameHudView.gameObject.SetActive(true);
-            
+
             blackboard.gameController.Client.AddHandler(DungenMessage.MoveActionPerformed, HandleMoveActionPerformed);
             blackboard.gameController.Client.AddHandler(DungenMessage.SetTurn, HandleSetTurn);
         }
@@ -21,9 +21,9 @@ namespace Dungen.Gameplay.States
         public override void Exit()
         {
             base.Exit();
-            
+
             blackboard.ui.GameHudView.gameObject.SetActive(false);
-            
+
             blackboard.gameController.Client.RemoveHandler(DungenMessage.MoveActionPerformed, HandleMoveActionPerformed);
             blackboard.gameController.Client.RemoveHandler(DungenMessage.SetTurn, HandleSetTurn);
         }
@@ -31,7 +31,7 @@ namespace Dungen.Gameplay.States
         private void HandleMoveActionPerformed(MessageHeader header)
         {
             var action = (MoveActionPerformedMessage) header;
-            
+
             blackboard.gameController.MovePlayer(action.networkId, action.newPosition);
         }
 

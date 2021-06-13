@@ -94,7 +94,7 @@ namespace Dungen.Gameplay
         public void SetTurn(uint playerId)
         {
             currentPlayerTurn = playerId;
-            
+
             if (playerId == Client.OwnNetworkId)
             {
                 StartTurn();
@@ -106,7 +106,7 @@ namespace Dungen.Gameplay
         }
 
         public void StartTurn()
-        {   
+        {
             ownPlayer.StartTurn();
         }
 

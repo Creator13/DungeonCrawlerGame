@@ -25,7 +25,7 @@ namespace Dungen.Netcode
             base.DeserializeObject(ref reader);
 
             networkId = reader.ReadUInt();
-            
+
             newPosition = new Vector2Int();
             newPosition.x = reader.ReadInt();
             newPosition.y = reader.ReadInt();

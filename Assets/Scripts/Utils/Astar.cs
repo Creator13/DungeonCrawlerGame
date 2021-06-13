@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-namespace Utils
+namespace EditorUtils
 {
     public static class Astar
     {

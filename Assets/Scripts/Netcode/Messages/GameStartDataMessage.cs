@@ -9,13 +9,13 @@ namespace Dungen.Netcode
         public uint networkId;
         public Vector2Int position;
     }
-    
+
     public class GameStartDataMessage : MessageHeader
     {
         public override ushort Type => (ushort) DungenMessage.GameStartData;
 
         public PlayerStartData[] playerData;
-        
+
         public override void SerializeObject(ref DataStreamWriter writer)
         {
             base.SerializeObject(ref writer);
@@ -36,7 +36,7 @@ namespace Dungen.Netcode
             var count = reader.ReadByte();
 
             playerData = new PlayerStartData[count];
-            
+
             for (var i = 0; i < count; i++)
             {
                 playerData[i].networkId = reader.ReadUInt();

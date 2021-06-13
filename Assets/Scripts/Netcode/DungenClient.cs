@@ -23,7 +23,7 @@ namespace Dungen.Netcode
         public PlayerInfo PlayerInfo { get; private set; }
 
         public uint OwnNetworkId => PlayerInfo.networkId;
-        
+
         public event Action<PlayerInfo> PlayerJoined;
         public event Action<uint> PlayerLeft;
 

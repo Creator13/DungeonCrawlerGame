@@ -4,7 +4,7 @@ using Dungen.Netcode;
 using Dungen.World;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Utils;
+using EditorUtils;
 
 namespace Dungen
 {

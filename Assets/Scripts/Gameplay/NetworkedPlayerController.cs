@@ -5,7 +5,7 @@ using Dungen.Netcode;
 using Dungen.World;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Utils;
+using EditorUtils;
 
 namespace Dungen
 {
@@ -117,7 +117,7 @@ namespace Dungen
         public void EndTurn()
         {
             if (!hasTurn) return;
-            
+
             hasTurn = false;
 
             playerInputActions.Disable();

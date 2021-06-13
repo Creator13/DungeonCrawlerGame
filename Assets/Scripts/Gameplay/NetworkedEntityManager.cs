@@ -23,7 +23,7 @@ namespace Dungen.Gameplay
             var obj = Instantiate(prototype);
             obj.SetGrid(grid);
             obj.InitializeFromNetwork(startData);
-            
+
             obj.NetworkId = startData.networkId;
             obj.playerName = gameController.Players[startData.networkId].name;
             obj.name = obj.playerName;

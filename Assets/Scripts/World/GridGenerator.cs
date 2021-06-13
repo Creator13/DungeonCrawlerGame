@@ -6,12 +6,12 @@ namespace Dungen.World
     public class GridGenerator
     {
         private readonly GeneratorSettings settings;
-        
+
         public GridGenerator(GeneratorSettings settings)
         {
             this.settings = settings;
         }
-        
+
         public TileData[] GenerateGrid()
         {
             var size = settings.sizeX * settings.sizeY;

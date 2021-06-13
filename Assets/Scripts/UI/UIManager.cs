@@ -17,7 +17,7 @@ namespace Dungen.UI
         private void Awake()
         {
             modal.HideModal();
-            
+
             joinMenuView.gameObject.SetActive(false);
             waitingToStartView.gameObject.SetActive(false);
             gameHudView.gameObject.SetActive(false);

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Dungen.Netcode;
 using UnityEngine;
-using Utils;
+using EditorUtils;
 
 namespace Dungen.World
 {
@@ -13,12 +13,12 @@ namespace Dungen.World
         private TileData[] tiles;
         private Cell[,] cells;
         private Dictionary<uint, Vector2Int> playerPositions = new Dictionary<uint, Vector2Int>();
-        
+
         public ServerGrid(GeneratorSettings settings)
         {
             this.settings = settings;
             this.generator = new GridGenerator(settings);
-            
+
             tiles = generator.GenerateGrid();
             cells = GridGenerator.GetCellGridFromTileDataGrid(tiles, settings.sizeX, settings.sizeY);
         }

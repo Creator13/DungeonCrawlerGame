@@ -8,7 +8,7 @@ namespace Dungen.Gameplay.States
         public JoiningState(DungenBlackboard blackboard) : base(blackboard) { }
 
         private JoinMenuView View => blackboard.ui.JoinMenuView;
-        
+
         public override void Enter(FiniteStateMachine<DungenBlackboard> parent)
         {
             base.Enter(parent);

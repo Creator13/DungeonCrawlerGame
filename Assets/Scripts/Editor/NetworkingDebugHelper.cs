@@ -1,9 +1,8 @@
 ﻿using System;
 using UnityEditor;
 
-namespace Utils
+namespace EditorUtils
 {
-#if UNITY_EDITOR
     public static class NetworkingDebugHelper
     {
         private const string TOGGLE_SERVER_DEBUG_MENU = "Dungen/Debug server";
@@ -44,5 +43,4 @@ namespace Utils
             return true;
         }
     }
-#endif
 }

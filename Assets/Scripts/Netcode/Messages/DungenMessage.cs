@@ -33,8 +33,9 @@ namespace Dungen.Netcode
         PlayerJoined,
         PlayerLeft,
         SetTurn,
-        MoveActionRequest, 
+        MoveActionRequest,
         MoveActionPerformed,
+
         Tick
         // World changes TODO
     }

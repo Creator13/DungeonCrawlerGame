@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Utils
+namespace EditorUtils
 {
     public static class DictionaryExtensions
     {

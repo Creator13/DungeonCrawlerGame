@@ -99,7 +99,7 @@ namespace Dungen.Netcode
 
                 SendBroadcast(response);
             }
-            
+
             MoveNextTurn();
         }
 
@@ -150,7 +150,7 @@ namespace Dungen.Netcode
             {
                 currentPlayerTurn = (currentPlayerTurn + 1) % playerTurns.Length;
             }
-            
+
             SendBroadcast(new SetTurnMessage {playerId = playerTurns[currentPlayerTurn]});
         }
     }

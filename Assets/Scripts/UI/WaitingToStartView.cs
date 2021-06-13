@@ -8,7 +8,7 @@ namespace Dungen.UI
     public class WaitingToStartView : MonoBehaviour
     {
         [SerializeField] private DungenGame gameController;
-        
+
         [SerializeField] private TMP_Text players;
         [SerializeField] private Button startButton;
 

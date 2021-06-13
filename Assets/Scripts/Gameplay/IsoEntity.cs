@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Dungen.World;
 using UnityEngine;
-using Utils;
+using EditorUtils;
 
 namespace Dungen
 {
@@ -36,7 +36,7 @@ namespace Dungen
         {
             MoveOverPath(grid.GetTilesFromPositions(Astar.FindPathToTarget(CurrentTile, destination, grid.CellGrid)));
         }
-        
+
         public void MoveOverPath(List<Tile> path)
         {
             if (moveRoutine != null)

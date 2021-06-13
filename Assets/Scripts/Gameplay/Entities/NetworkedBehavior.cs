@@ -7,7 +7,7 @@ namespace Dungen.Netcode
     {
         public string playerName;
         protected IsoEntity controllingEntity;
-        
+
         public uint NetworkId { get; set; }
 
         public void InitializeFromNetwork(PlayerStartData data)

@@ -9,7 +9,7 @@ namespace Dungen.Gameplay.States
     public class WaitingToStartState : State<DungenBlackboard>
     {
         private WaitingToStartView View => blackboard.ui.WaitingToStartView;
-        
+
         public WaitingToStartState(DungenBlackboard bb) : base(bb) { }
 
         public override void Enter(FiniteStateMachine<DungenBlackboard> parent)
@@ -48,20 +48,20 @@ namespace Dungen.Gameplay.States
                 blackboard.ui.Modal.ShowModal(Modal.ModalDialogAction.Confirm, "Error", $"{response.status}");
             }
         }
-        
+
         private void HandleGameStartData(MessageHeader header)
         {
             var dataMessage = (GameStartDataMessage) header;
-            
+
             blackboard.gameController.InitializeWorld(dataMessage.playerData);
-            
+
             blackboard.gameController.Client.SendPackedMessage(new ClientReadyMessage());
         }
 
         private void HandleGameStarting(MessageHeader header)
         {
             var _ = (GameStartingMessage) header;
-            
+
             blackboard.gameController.RequestStateChange<GameActiveState>();
         }
     }
