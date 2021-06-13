@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Networking;
+﻿using Networking;
 using Unity.Networking.Transport;
 using UnityEngine;
 

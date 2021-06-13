@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Dungen.World;
 using Networking;
 using Unity.Networking.Transport;
@@ -11,10 +12,6 @@ namespace Dungen.Netcode
         private static uint managedNetworkId;
         public static uint NextNetworkId => managedNetworkId++;
 
-        private readonly GeneratorSettings generatorSettings;
-        private readonly Lobby lobby;
-        private readonly ServerGrid grid;
-
         protected override Dictionary<ushort, ServerMessageHandler> NetworkMessageHandlers =>
             new Dictionary<ushort, ServerMessageHandler> {
                 {(ushort) DungenMessage.Handshake, lobby.AcceptConnection},
@@ -22,6 +19,15 @@ namespace Dungen.Netcode
                 {(ushort) DungenMessage.ClientReady, HandleClientReady},
                 {(ushort) DungenMessage.MoveActionRequest, HandleMoveActionRequest},
             };
+
+        private readonly GeneratorSettings generatorSettings;
+        private readonly Lobby lobby;
+        private readonly ServerGrid grid;
+
+        private uint[] playerTurns;
+        private int currentPlayerTurn;
+
+        public bool GameStarted { get; private set; }
 
         public DungenServer(ushort port, GeneratorSettings generatorSettings) : base(port, MessageInfo.dungenTypeMap)
         {
@@ -83,16 +89,18 @@ namespace Dungen.Netcode
             var request = (MoveActionRequestMessage) header;
 
             var playerId = lobby.GetNetworkIdOfConnection(connection);
-            
+
             if (grid.SetPlayer(playerId, request.newPosition))
             {
                 var response = new MoveActionPerformedMessage {
                     networkId = playerId,
                     newPosition = request.newPosition
                 };
-                
+
                 SendBroadcast(response);
             }
+            
+            MoveNextTurn();
         }
 
         private void SendStartData()
@@ -122,9 +130,28 @@ namespace Dungen.Netcode
         private void StartGame()
         {
             lobby.ClearReadyStatus();
-            
+
+            GameStarted = true;
+
             SendBroadcast(new GameStartingMessage());
-            SendBroadcast(new SetTurnMessage() {playerId = lobby.Players[0].networkId});
+
+            MoveNextTurn();
+        }
+
+        private void MoveNextTurn()
+        {
+            if (playerTurns == null)
+            {
+                playerTurns = lobby.Players.Select(p => p.networkId).ToArray();
+
+                currentPlayerTurn = Random.Range(0, playerTurns.Length);
+            }
+            else
+            {
+                currentPlayerTurn = (currentPlayerTurn + 1) % playerTurns.Length;
+            }
+            
+            SendBroadcast(new SetTurnMessage {playerId = playerTurns[currentPlayerTurn]});
         }
     }
 }

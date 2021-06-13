@@ -50,7 +50,7 @@ namespace Dungen.Netcode
             var networkId = DungenServer.NextNetworkId;
 
             HandshakeResponseMessage handshakeResponse;
-            if (!Full)
+            if (!Full & !server.GameStarted)
             {
                 var playerInfo = new PlayerInfo(networkId, handshake.requestedPlayerName);
 
@@ -60,6 +60,7 @@ namespace Dungen.Netcode
                     networkId = playerInfo.networkId
                 };
 
+                // Store players before adding new player
                 var others = Players;
 
                 players[connection] = new LobbiedPlayer {playerInfo = playerInfo};
@@ -82,8 +83,18 @@ namespace Dungen.Netcode
             }
             else
             {
+                var status = HandshakeResponseMessage.HandshakeResponseStatus.Undefined;
+                if (Full)
+                {
+                    status = HandshakeResponseMessage.HandshakeResponseStatus.LobbyFull;
+                }
+                else if (server.GameStarted)
+                {
+                    status = HandshakeResponseMessage.HandshakeResponseStatus.GameInProgress;
+                }
+
                 handshakeResponse = new HandshakeResponseMessage {
-                    status = HandshakeResponseMessage.HandshakeResponseStatus.LobbyFull,
+                    status = status,
                     playerName = handshake.requestedPlayerName,
                     networkId = networkId
                 };

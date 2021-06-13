@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dungen.Gameplay.States;
 using Dungen.Netcode;
+using Dungen.UI;
 using Dungen.World;
 using FSM;
 using UnityEngine;
@@ -23,6 +23,9 @@ namespace Dungen.Gameplay
         [SerializeField] private NetworkedEntityManager entityManager;
 
         public DungenClient Client => clientBehaviour.Client;
+
+        private uint currentPlayerTurn;
+        public PlayerInfo CurrentPlayerTurn => Players[currentPlayerTurn];
 
         public Dictionary<uint, PlayerInfo> Players { get; } = new Dictionary<uint, PlayerInfo>();
 
@@ -86,6 +89,20 @@ namespace Dungen.Gameplay
         {
             var moveRequest = new MoveActionRequestMessage {newPosition = newPosition};
             Client.SendPackedMessage(moveRequest);
+        }
+
+        public void SetTurn(uint playerId)
+        {
+            currentPlayerTurn = playerId;
+            
+            if (playerId == Client.OwnNetworkId)
+            {
+                StartTurn();
+            }
+            else
+            {
+                EndTurn();
+            }
         }
 
         public void StartTurn()

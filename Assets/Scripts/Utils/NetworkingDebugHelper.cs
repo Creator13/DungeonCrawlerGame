@@ -38,6 +38,8 @@ namespace Utils
         [MenuItem(TOGGLE_SERVER_DEBUG_MENU, true)]
         private static bool ValidateToggleServerDebug()
         {
+            debugEnabled = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup)
+                                         .Contains(DEBUG_DEFINE);
             Menu.SetChecked(TOGGLE_SERVER_DEBUG_MENU, debugEnabled);
             return true;
         }
