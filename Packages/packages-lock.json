@@ -1,5 +1,15 @@
 {
   "dependencies": {
+    "com.cvanbattum.networking": {
+      "version": "https://github.com/Creator13/BasicNetworking.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.transport": "0.8.0-preview.8",
+        "com.unity.collections": "0.17.0-preview.18"
+      },
+      "hash": "baa3570b55fe407f8a310692711b9fecc33406d6"
+    },
     "com.unity.burst": {
       "version": "1.5.3",
       "depth": 2,
@@ -33,7 +43,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.rider": {
-      "version": "3.0.6",
+      "version": "3.0.7",
       "depth": 0,
       "source": "registry",
       "dependencies": {
