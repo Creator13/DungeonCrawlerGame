@@ -207,11 +207,11 @@ namespace Networking
                 {
                     Debug.LogError($"Malformed message received: code {msgType}\n{e}");
                 }
-                // catch (Exception e)
-                // {
-                //     Debug.LogError(e);
-                //     Debug.LogError($"Exception while reading message of type {typeMap[msgType].Name}");
-                // }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception while reading message of type {typeMap[msgType].Name}");
+                    throw;
+                }
             }
 
             if (NetworkMessageHandlers.ContainsKey(msgType))
@@ -225,11 +225,11 @@ namespace Networking
                 {
                     Debug.LogError($"Malformed message received: code {msgType}\n{e}");
                 }
-                // catch (Exception e)
-                // {
-                //     Debug.LogError(e);
-                //     Debug.LogError($"Exception while reading message of type {typeMap[msgType].Name}");
-                // }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception while reading message of type {typeMap[msgType].Name}");
+                    throw;
+                }
             }
 
             if (!hasKey)

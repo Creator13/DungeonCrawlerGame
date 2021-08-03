@@ -92,6 +92,10 @@ namespace Dungen.Netcode
         public void RemoveHandler(DungenMessage messageType, ClientMessageHandler handler)
         {
             NetworkMessageHandlers[(ushort) messageType] -= handler;
+            if (NetworkMessageHandlers[(ushort) messageType] == null)
+            {
+                NetworkMessageHandlers.Remove((ushort) messageType);
+            }
         }
 
         #endregion

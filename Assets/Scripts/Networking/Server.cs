@@ -305,6 +305,11 @@ namespace Networking
                 {
                     Debug.LogError($"Badly formatted message received: {msgType}\n{e.StackTrace}");
                 }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception while reading message of type {fullTypeMap[msgType].Name}");
+                    throw;
+                }
             }
 
             // Then execute game-specific handlers
@@ -318,6 +323,11 @@ namespace Networking
                 catch (KeyNotFoundException e)
                 {
                     Debug.LogError($"Badly formatted message received: {msgType}\n{e.StackTrace}");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception while reading message of type {fullTypeMap[msgType].Name}");
+                    throw;
                 }
             }
 
