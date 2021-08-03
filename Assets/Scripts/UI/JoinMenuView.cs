@@ -15,14 +15,14 @@ namespace Dungen.UI
         [SerializeField] private TMP_InputField ipInput;
         // [SerializeField] private TMP_InputField nameInput;
 
-        private HighscoreUserManager highscoreUserManager;
+        private PlayerHighscoreHelper playerHighscoreHelper;
 
         public void Start()
         {
             joinGameButton.onClick.AddListener(JoinGame);
             newGameButton.onClick.AddListener(NewGame);
 
-            highscoreUserManager = gameController.HighscoreUserManager;
+            playerHighscoreHelper = gameController.PlayerHighscoreHelper;
         }
 
         private void OnDisable()
@@ -40,8 +40,8 @@ namespace Dungen.UI
         {
             var ipEmpty = string.IsNullOrEmpty(ipInput.text);
 
-            newGameButton.interactable = highscoreUserManager.LoggedIn;
-            joinGameButton.interactable = highscoreUserManager.LoggedIn && !ipEmpty;
+            newGameButton.interactable = playerHighscoreHelper.LoggedIn;
+            joinGameButton.interactable = playerHighscoreHelper.LoggedIn && !ipEmpty;
         }
 
         private void JoinGame()

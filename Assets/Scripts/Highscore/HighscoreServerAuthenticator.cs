@@ -29,8 +29,6 @@ namespace Dungen.Highscore
                 return serverLoggedIn;
             }
 
-            serverAuthSessionCookie = sessionStartRequest.GetResponseHeader("Cookie");
-
             gameSessionId = int.Parse(sessionStartRequest.downloadHandler.text);
 
             using var serverAuthRequest = UnityWebRequest.Post(HighscoreConstants.GetUrl("/login/server"),
@@ -47,7 +45,6 @@ namespace Dungen.Highscore
                 return serverLoggedIn;
             }
 
-            serverAuthSessionCookie ??= serverAuthRequest.GetResponseHeader("Cookie");
             serverLoggedIn = true;
             return serverLoggedIn;
         }
@@ -66,9 +63,6 @@ namespace Dungen.Highscore
 
             using var www = UnityWebRequest.Post(HighscoreConstants.GetUrl("/api/add-highscore"),
                 new Dictionary<string, string> {{"user_id", $"{playerId}"}, {"score", $"{score}"}});
-
-            // Make sure the cookie is still set.
-            // www.SetRequestHeader("Cookie", serverAuthSessionCookie);
 
             yield return www.SendWebRequest();
 

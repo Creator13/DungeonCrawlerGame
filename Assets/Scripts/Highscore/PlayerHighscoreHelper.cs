@@ -14,7 +14,7 @@ namespace Dungen.Highscore
         public int score;
     }
 
-    public class HighscoreUserManager : MonoBehaviour
+    public class PlayerHighscoreHelper : MonoBehaviour
     {
         [Serializable]
         private struct HighscoreListWrapper
@@ -41,6 +41,8 @@ namespace Dungen.Highscore
 
         public event Action<string> LoginFailed;
         public event Action<User> LoginSucceeded;
+
+        public event Action HighscoresDownloaded;
 
         public IEnumerator PlayerLoginRequest(string email, string password)
         {
@@ -96,13 +98,30 @@ namespace Dungen.Highscore
 
         public IEnumerator HighscoreListRequest()
         {
-            using var www = UnityWebRequest.Get(HighscoreConstants.GetUrl("/api/highscoreList"));
+            using var www = UnityWebRequest.Get(HighscoreConstants.GetUrl("/api/highscore-list"));
 
             yield return www.SendWebRequest();
 
             var json = www.downloadHandler.text;
+            Debug.Log($"{{\"highscores\":{json}}}");
             var wrapper = JsonUtility.FromJson<HighscoreListWrapper>($"{{\"highscores\":{json}}}");
             highscoreList = wrapper.highscores;
+            HighscoresDownloaded?.Invoke();
+        }
+
+        private void OnDestroy()
+        {
+            if (!LoggedIn) return;
+            
+            using var www = UnityWebRequest.Get(HighscoreConstants.GetUrl("/login/logout"));
+
+            www.SendWebRequest();
+            while (!www.isDone) { }
+
+            if (www.responseCode != 200)
+            {
+                Debug.LogError($"Failed to log out player: HTTP {www.responseCode}");
+            }
         }
     }
 }

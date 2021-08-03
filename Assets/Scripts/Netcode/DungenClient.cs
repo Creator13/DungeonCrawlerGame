@@ -38,7 +38,7 @@ namespace Dungen.Netcode
             var handshake = new HandshakeMessage
             {
                 requestedPlayerName = originalPlayerName, 
-                highscoreServerId = gameController.HighscoreUserManager.CurrentUser.id
+                highscoreServerId = gameController.PlayerHighscoreHelper.CurrentUser.id
             };
             SendPackedMessage(handshake);
         }

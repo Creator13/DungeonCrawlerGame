@@ -19,7 +19,7 @@ namespace Dungen.UI
         [SerializeField] private TMP_InputField password;
         [SerializeField] private Button login;
 
-        private HighscoreUserManager highscoreUserManager;
+        private PlayerHighscoreHelper playerHighscoreHelper;
 
         private void Start()
         {
@@ -27,27 +27,27 @@ namespace Dungen.UI
             loginDetails.gameObject.SetActive(true);
             
             login.onClick.AddListener(Login);
-            highscoreUserManager = gameController.HighscoreUserManager;
+            playerHighscoreHelper = gameController.PlayerHighscoreHelper;
             
-            highscoreUserManager.LoginFailed += FlashLoginMessage;
-            highscoreUserManager.LoginSucceeded += ShowUser;
+            playerHighscoreHelper.LoginFailed += FlashLoginMessage;
+            playerHighscoreHelper.LoginSucceeded += ShowUser;
         }
 
         private void OnDisable()
         {
             login.onClick.RemoveListener(Login);
             
-            if (highscoreUserManager)
+            if (playerHighscoreHelper)
             {
-                highscoreUserManager.LoginFailed -= FlashLoginMessage;
-                highscoreUserManager.LoginSucceeded -= ShowUser;
+                playerHighscoreHelper.LoginFailed -= FlashLoginMessage;
+                playerHighscoreHelper.LoginSucceeded -= ShowUser;
             }
         }
 
         private void Login()
         {
             error.gameObject.SetActive(false);
-            StartCoroutine(highscoreUserManager.PlayerLoginRequest(email.text, password.text));
+            StartCoroutine(playerHighscoreHelper.PlayerLoginRequest(email.text, password.text));
         }
 
         private void FlashLoginMessage(string msg)
@@ -56,10 +56,10 @@ namespace Dungen.UI
             error.text = msg;
         }
 
-        private void ShowUser(HighscoreUserManager.User user)
+        private void ShowUser(PlayerHighscoreHelper.User user)
         {
-            highscoreUserManager.LoginFailed -= FlashLoginMessage;
-            highscoreUserManager.LoginSucceeded -= ShowUser;
+            playerHighscoreHelper.LoginFailed -= FlashLoginMessage;
+            playerHighscoreHelper.LoginSucceeded -= ShowUser;
          
             loginDetails.gameObject.SetActive(false);
             welcome.gameObject.SetActive(true);

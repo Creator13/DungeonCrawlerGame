@@ -26,10 +26,10 @@ namespace Dungen.Gameplay
         [SerializeField] private GeneratorSettings generatorSettings;
         [SerializeField] private IsoGrid grid;
         [SerializeField] private NetworkedEntityManager entityManager;
-        [SerializeField] private HighscoreUserManager highscoreUserManager;
+        [FormerlySerializedAs("highscoreUserManager")] [SerializeField] private PlayerHighscoreHelper playerHighscoreHelper;
 
         public DungenClient Client => clientBehaviour.Client;
-        public HighscoreUserManager HighscoreUserManager => highscoreUserManager;
+        public PlayerHighscoreHelper PlayerHighscoreHelper => playerHighscoreHelper;
 
         private uint currentPlayerTurn;
         public PlayerInfo CurrentPlayerTurn => Players[currentPlayerTurn];
@@ -71,12 +71,12 @@ namespace Dungen.Gameplay
 
         public void ConnectToServer(string ip)
         {
-            if (!highscoreUserManager.LoggedIn)
+            if (!playerHighscoreHelper.LoggedIn)
             {
                 throw new InvalidOperationException("Can't start game without a user logged in!");
             }
 
-            clientBehaviour.CreateAndConnect(this, highscoreUserManager.CurrentUser.nickname, ip);
+            clientBehaviour.CreateAndConnect(this, playerHighscoreHelper.CurrentUser.nickname, ip);
 
             Client.Connected += BindClientEvents;
             Client.Disconnected += UnbindClientEvents;
@@ -84,7 +84,7 @@ namespace Dungen.Gameplay
 
         public void StartServerAndConnect(string ip)
         {
-            if (!highscoreUserManager.LoggedIn)
+            if (!playerHighscoreHelper.LoggedIn)
             {
                 throw new InvalidOperationException("Can't start game without a user logged in!");
             }
