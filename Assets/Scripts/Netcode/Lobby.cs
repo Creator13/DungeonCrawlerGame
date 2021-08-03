@@ -10,6 +10,7 @@ namespace Dungen.Netcode
     public class LobbiedPlayer
     {
         public PlayerInfo playerInfo;
+        public int highscoreServerId;
         public bool sentData;
         public bool ready;
     }
@@ -29,6 +30,7 @@ namespace Dungen.Netcode
         public IEnumerable<NetworkConnection> PlayerConnections => players.Keys;
         public bool Full => PlayerCount >= MaxPlayers;
         public bool AllPlayersReady => players.Values.All(p => p.ready);
+        public int[] HighscoreServerIds => players.Values.Select(player => player.highscoreServerId).ToArray();
 
         public Lobby(DungenServer server, int capacity)
         {
@@ -63,7 +65,10 @@ namespace Dungen.Netcode
                 // Store players before adding new player
                 var others = Players;
 
-                players[connection] = new LobbiedPlayer {playerInfo = playerInfo};
+                players[connection] = new LobbiedPlayer {
+                    playerInfo = playerInfo,
+                    highscoreServerId = handshake.highscoreServerId
+                };
                 PlayersUpdated?.Invoke();
 
                 server.MarkKeepAlive(connection);
@@ -110,7 +115,7 @@ namespace Dungen.Netcode
 
         public void SetReadyStatus(NetworkConnection connection, bool ready)
         {
-            players[connection].ready = true;
+            players[connection].ready = ready;
         }
 
         public void ClearReadyStatus()

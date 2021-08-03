@@ -35,7 +35,11 @@ namespace Dungen.Netcode
 
         protected override void OnConnected()
         {
-            var handshake = new HandshakeMessage {requestedPlayerName = originalPlayerName};
+            var handshake = new HandshakeMessage
+            {
+                requestedPlayerName = originalPlayerName, 
+                highscoreServerId = gameController.HighscoreUserManager.CurrentUser.id
+            };
             SendPackedMessage(handshake);
         }
 

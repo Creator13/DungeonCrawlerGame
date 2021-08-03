@@ -26,7 +26,7 @@ namespace Dungen.Gameplay
 
         private float lastTickTime;
 
-        private int score;
+        public int Score { get; private set; }
 
         private List<SimulatedEnemy> enemies = new List<SimulatedEnemy>();
 
@@ -116,8 +116,8 @@ namespace Dungen.Gameplay
 
         public void AddScore(int toAdd)
         {
-            score += toAdd;
-            Server.SendBroadcast(new ScoreUpdateMessage {newScore = score});
+            Score += toAdd;
+            Server.SendBroadcast(new ScoreUpdateMessage {newScore = Score});
         }
         
         private void MoveEnemies()
@@ -148,7 +148,7 @@ namespace Dungen.Gameplay
         {
             Server.EndGame();
             
-            Server.SendBroadcast(new GameOverMessage {finalScore = score});
+            Server.SendBroadcast(new GameOverMessage {finalScore = Score});
         }
     }
 }

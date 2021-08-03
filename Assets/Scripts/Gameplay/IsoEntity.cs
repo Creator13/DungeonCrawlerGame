@@ -34,7 +34,10 @@ namespace Dungen.Gameplay
 
         private void OnDestroy()
         {
-            CurrentTile.RemoveEntity(this);
+            if (CurrentTile)
+            {
+                CurrentTile.RemoveEntity(this);
+            }
         }
 
         public void MoveOverPath(Vector2Int destination)
