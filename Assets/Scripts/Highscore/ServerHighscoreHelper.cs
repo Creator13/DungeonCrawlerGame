@@ -6,11 +6,10 @@ using UnityEngine.Networking;
 
 namespace Dungen.Highscore
 {
-    public class HighscoreServerAuthenticator : MonoBehaviour
+    public class ServerHighscoreHelper : MonoBehaviour
     {
         [SerializeField] private bool serverLoggedIn;
         [SerializeField] private int gameSessionId;
-        [SerializeField] private string serverAuthSessionCookie;
 
         public bool ServerLoggedIn => serverLoggedIn;
 
@@ -19,8 +18,8 @@ namespace Dungen.Highscore
             using var sessionStartRequest = UnityWebRequest.Get(HighscoreConstants.GetUrl("/login/start-game-session"));
 
             sessionStartRequest.SendWebRequest();
-            
-            while (!sessionStartRequest.isDone) { } // Should block the game thread
+
+            while (!sessionStartRequest.isDone) { } // Method is blocking on purpose
 
             if (sessionStartRequest.responseCode != 200)
             {
@@ -31,9 +30,11 @@ namespace Dungen.Highscore
 
             gameSessionId = int.Parse(sessionStartRequest.downloadHandler.text);
 
-            using var serverAuthRequest = UnityWebRequest.Post(HighscoreConstants.GetUrl("/login/server"),
-                new Dictionary<string, string>
-                    {{"game-session", $"{gameSessionId}"}, {"password", HighscoreConstants.VERY_SECRET_SERVER_PASSWORD}});
+            using var serverAuthRequest = UnityWebRequest.Post(HighscoreConstants.GetUrl("/login/server"), new Dictionary<string, string> {
+                    {"game-session", $"{gameSessionId}"},
+                    {"password", HighscoreConstants.VERY_SECRET_SERVER_PASSWORD}
+                }
+            );
 
             serverAuthRequest.SendWebRequest();
             while (!serverAuthRequest.isDone) { }
@@ -52,6 +53,8 @@ namespace Dungen.Highscore
         public void SendHighscoreSubmitRequest(int playerId, int score)
         {
             StartCoroutine(SubmitHighscore(playerId, score));
+
+            // TODO implement a callback for when requests are completed, to prevent the highscores from being submitted too late before the client downloads the list from the server
         }
 
         private IEnumerator SubmitHighscore(int playerId, int score)
@@ -90,7 +93,7 @@ namespace Dungen.Highscore
                 Debug.Log($"Server logout failed: HTTP {www.responseCode}");
             }
         }
-        
+
         private void OnDestroy()
         {
             Logout();

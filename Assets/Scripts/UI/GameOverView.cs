@@ -61,11 +61,12 @@ namespace Dungen.UI
             {
                 Destroy(t.gameObject);
             }
-            
+
+            var i = 0;
             foreach (var listing in game.PlayerHighscoreHelper.highscoreList)
             {
                 var uiItem = Instantiate(highscoreItemPrefab, highscoreList);
-                uiItem.SetValues(listing);
+                uiItem.SetValues(listing, ++i);
             }
         }
 

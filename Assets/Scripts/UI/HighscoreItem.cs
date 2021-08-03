@@ -7,11 +7,13 @@ namespace Dungen.UI
 {
     public class HighscoreItem : MonoBehaviour
     {
+        [SerializeField] private TMP_Text position;
         [SerializeField] private TMP_Text playerName;
         [SerializeField] private TMP_Text date;
 
-        public void SetValues(HighscoreListing hs)
+        public void SetValues(HighscoreListing hs, int position)
         {
+            this.position.text = position.ToString();
             playerName.text = $"{hs.nickname}: {hs.score}";
             date.text = ParseUnixTimeToString(hs.time);
         }

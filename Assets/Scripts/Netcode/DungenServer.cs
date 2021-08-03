@@ -24,7 +24,7 @@ namespace Dungen.Netcode
 
         private readonly Lobby lobby;
         private readonly GameSimulator simulator;
-        private readonly HighscoreServerAuthenticator highscore;
+        private readonly ServerHighscoreHelper serverHighscore;
 
         private uint[] playerTurns;
         private int currentPlayerTurn;
@@ -32,12 +32,12 @@ namespace Dungen.Netcode
         public uint CurrentTurnPlayerId => playerTurns[currentPlayerTurn];
         public bool GameStarted { get; private set; }
 
-        public DungenServer(ushort port, GameSimulator simulator, HighscoreServerAuthenticator highscore) : base(port,
+        public DungenServer(ushort port, GameSimulator simulator, ServerHighscoreHelper serverHighscore) : base(port,
             MessageInfo.dungenTypeMap)
         {
             lobby = new Lobby(this, 4);
             this.simulator = simulator;
-            this.highscore = highscore;
+            this.serverHighscore = serverHighscore;
         }
 
         private void HandleStartRequest(NetworkConnection connection, MessageHeader header)
@@ -146,7 +146,7 @@ namespace Dungen.Netcode
 
         private void StartGame()
         {
-            if (!highscore.ServerLoginRequest())
+            if (!serverHighscore.ServerLoginRequest())
             {
                 Debug.LogError("Server login failed, will not publish highscores for this session.");
             }
@@ -165,11 +165,11 @@ namespace Dungen.Netcode
         {
             GameStarted = false;
 
-            if (highscore.ServerLoggedIn)
+            if (serverHighscore.ServerLoggedIn)
             {
                 foreach (var id in lobby.HighscoreServerIds)
                 {
-                    highscore.SendHighscoreSubmitRequest(id, simulator.Score);
+                    serverHighscore.SendHighscoreSubmitRequest(id, simulator.Score);
                 }
             }
         }

@@ -9,7 +9,7 @@ namespace Dungen.Netcode
     {
         [SerializeField] private ushort port = 1511;
         [SerializeField] private GameSimulator simulator;
-        [SerializeField] private HighscoreServerAuthenticator authenticator;
+        [SerializeField] private ServerHighscoreHelper authenticator;
 
         public DungenServer Server { get; private set; }
 
