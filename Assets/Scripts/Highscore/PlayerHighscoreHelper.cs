@@ -98,7 +98,7 @@ namespace Dungen.Highscore
 
         public IEnumerator HighscoreListRequest()
         {
-            using var www = UnityWebRequest.Get(HighscoreConstants.GetUrl("/api/highscore-list"));
+            using var www = UnityWebRequest.Get(HighscoreConstants.GetUrl("/api/highscore-list?count=200"));
 
             yield return www.SendWebRequest();
 
