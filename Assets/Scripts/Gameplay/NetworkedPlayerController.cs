@@ -135,6 +135,9 @@ namespace Dungen.Gameplay
             {
                 SwitchToMoveMode();
             }
+            
+            var screenPos = playerInputActions["PointerMove"].ReadValue<Vector2>();
+            UpdatePointerWorldPosition(screenPos);
         }
 
         private void SwitchToMoveMode()

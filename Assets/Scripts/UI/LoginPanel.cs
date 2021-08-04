@@ -35,6 +35,11 @@ namespace Dungen.UI
 
             playerHighscoreHelper.LoginFailed += OnLoginFailed;
             playerHighscoreHelper.LoginSucceeded += ShowUser;
+
+            email.onValueChanged.AddListener(OnFieldChange);
+            password.onValueChanged.AddListener(OnFieldChange);
+
+            loginButton.interactable = ValidateInputFields();
         }
 
         private void OnDisable()
@@ -46,16 +51,19 @@ namespace Dungen.UI
                 playerHighscoreHelper.LoginFailed -= OnLoginFailed;
                 playerHighscoreHelper.LoginSucceeded -= ShowUser;
             }
+
+            email.onValueChanged.RemoveListener(OnFieldChange);
+            password.onValueChanged.RemoveListener(OnFieldChange);
         }
 
-        private void Update()
+        private void OnFieldChange(string _)
         {
-            loginButton.interactable = ValidateInput();
+            loginButton.interactable = ValidateInputFields();
         }
 
-        private bool ValidateInput()
+        private bool ValidateInputFields()
         {
-            return string.IsNullOrEmpty(email.text) && string.IsNullOrEmpty(password.text);
+            return !(string.IsNullOrEmpty(email.text) || string.IsNullOrEmpty(password.text));
         }
 
         private void Login()
