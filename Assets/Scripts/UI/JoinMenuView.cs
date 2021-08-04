@@ -1,4 +1,5 @@
 ﻿using Dungen.Gameplay;
+using Dungen.Highscore;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,12 +13,16 @@ namespace Dungen.UI
         [SerializeField] private Button newGameButton;
         [SerializeField] private Button joinGameButton;
         [SerializeField] private TMP_InputField ipInput;
-        [SerializeField] private TMP_InputField nameInput;
+        // [SerializeField] private TMP_InputField nameInput;
+
+        private PlayerHighscoreHelper playerHighscoreHelper;
 
         public void Start()
         {
             joinGameButton.onClick.AddListener(JoinGame);
             newGameButton.onClick.AddListener(NewGame);
+
+            playerHighscoreHelper = gameController.PlayerHighscoreHelper;
         }
 
         private void OnDisable()
@@ -33,21 +38,20 @@ namespace Dungen.UI
 
         private void UpdateButtonsEnabled()
         {
-            var nameEmpty = string.IsNullOrEmpty(nameInput.text);
             var ipEmpty = string.IsNullOrEmpty(ipInput.text);
 
-            newGameButton.interactable = !nameEmpty;
-            joinGameButton.interactable = !nameEmpty && !ipEmpty;
+            newGameButton.interactable = playerHighscoreHelper.LoggedIn;
+            joinGameButton.interactable = playerHighscoreHelper.LoggedIn && !ipEmpty;
         }
 
         private void JoinGame()
         {
-            gameController.ConnectToServer(nameInput.text, ipInput.text);
+            gameController.ConnectToServer(ipInput.text);
         }
 
         private void NewGame()
         {
-            gameController.StartServerAndConnect(nameInput.text, ipInput.text);
+            gameController.StartServerAndConnect(ipInput.text);
         }
     }
 }

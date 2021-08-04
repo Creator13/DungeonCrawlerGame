@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using Dungen.Gameplay.States;
+using Dungen.Highscore;
 using Dungen.Netcode;
 using Dungen.UI;
 using Dungen.World;
 using FSM;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace Dungen.Gameplay
 {
@@ -22,12 +26,14 @@ namespace Dungen.Gameplay
         [SerializeField] private GeneratorSettings generatorSettings;
         [SerializeField] private IsoGrid grid;
         [SerializeField] private NetworkedEntityManager entityManager;
+        [FormerlySerializedAs("highscoreUserManager")] [SerializeField] private PlayerHighscoreHelper playerHighscoreHelper;
 
         public DungenClient Client => clientBehaviour.Client;
+        public PlayerHighscoreHelper PlayerHighscoreHelper => playerHighscoreHelper;
 
         private uint currentPlayerTurn;
         public PlayerInfo CurrentPlayerTurn => Players[currentPlayerTurn];
-        
+
         public int Score { get; private set; }
 
         public Dictionary<uint, PlayerInfo> Players { get; } = new Dictionary<uint, PlayerInfo>();
@@ -63,18 +69,28 @@ namespace Dungen.Gameplay
             GameStateMachine.ChangeState(newState);
         }
 
-        public void ConnectToServer(string name, string ip)
+        public void ConnectToServer(string ip)
         {
-            clientBehaviour.CreateAndConnect(this, name, ip);
+            if (!playerHighscoreHelper.LoggedIn)
+            {
+                throw new InvalidOperationException("Can't start game without a user logged in!");
+            }
+
+            clientBehaviour.CreateAndConnect(this, playerHighscoreHelper.CurrentUser.nickname, ip);
 
             Client.Connected += BindClientEvents;
             Client.Disconnected += UnbindClientEvents;
         }
 
-        public void StartServerAndConnect(string name, string ip)
+        public void StartServerAndConnect(string ip)
         {
+            if (!playerHighscoreHelper.LoggedIn)
+            {
+                throw new InvalidOperationException("Can't start game without a user logged in!");
+            }
+
             SceneManager.LoadScene("Server", LoadSceneMode.Additive);
-            ConnectToServer(name, ip);
+            ConnectToServer(ip);
         }
 
         public void InitializeWorld(PlayerStartData[] players)
@@ -87,11 +103,11 @@ namespace Dungen.Gameplay
         {
             entityManager.UnregisterEntity(ownPlayer.NetworkId);
             ownPlayer.gameObject.SetActive(false);
-            
+
             grid.gameObject.SetActive(false);
             entityManager.DespawnAll();
         }
-        
+
         public void MoveEntity(uint id, Vector2Int newPosition)
         {
             entityManager.MoveEntity(id, newPosition);
@@ -181,6 +197,7 @@ namespace Dungen.Gameplay
         private void OnPlayerLeft(uint playerId)
         {
             Players.Remove(playerId);
+            RequestStateChange<GameLeftState>();
         }
     }
 }

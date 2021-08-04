@@ -8,6 +8,7 @@ namespace Dungen.Netcode
         public override ushort Type => (ushort) DungenMessage.Handshake;
 
         public string requestedPlayerName = "";
+        public int highscoreServerId;
 
         public override void SerializeObject(ref DataStreamWriter writer)
         {
@@ -15,6 +16,7 @@ namespace Dungen.Netcode
             base.SerializeObject(ref writer);
 
             writer.WriteFixedString128(requestedPlayerName);
+            writer.WriteInt(highscoreServerId);
         }
 
         public override void DeserializeObject(ref DataStreamReader reader)
@@ -23,6 +25,7 @@ namespace Dungen.Netcode
             base.DeserializeObject(ref reader);
 
             requestedPlayerName = reader.ReadFixedString128().ToString();
+            highscoreServerId = reader.ReadInt();
         }
     }
 }

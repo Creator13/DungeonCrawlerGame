@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 54891582}
   - component: {fileID: 54891583}
   - component: {fileID: 54891584}
+  - component: {fileID: 54891585}
   m_Layer: 0
   m_Name: Server
   m_TagString: Untagged
@@ -169,6 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   port: 1511
   simulator: {fileID: 54891584}
+  authenticator: {fileID: 54891585}
 --- !u!114 &54891584
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -185,3 +187,18 @@ MonoBehaviour:
   timeBetweenTicks: 1
   serverBehavior: {fileID: 54891583}
   running: 0
+--- !u!114 &54891585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 54891581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3505f6aee6f84d0d8968deb3b52f9ded, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverLoggedIn: 0
+  gameSessionId: 0
+  serverAuthSessionCookie: 

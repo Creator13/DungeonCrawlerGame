@@ -1,4 +1,5 @@
 ﻿using Dungen.Gameplay;
+using Dungen.Highscore;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -8,13 +9,14 @@ namespace Dungen.Netcode
     {
         [SerializeField] private ushort port = 1511;
         [SerializeField] private GameSimulator simulator;
+        [SerializeField] private ServerHighscoreHelper authenticator;
 
         public DungenServer Server { get; private set; }
 
         private void Awake()
         {
             Assert.IsNotNull(simulator);
-            Server = new DungenServer(port, simulator);
+            Server = new DungenServer(port, simulator, authenticator);
         }
 
         private void Start()

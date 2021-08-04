@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Dungen.Gameplay;
+using Dungen.Highscore;
 using Networking;
 using Unity.Networking.Transport;
 using UnityEngine;
@@ -23,6 +24,7 @@ namespace Dungen.Netcode
 
         private readonly Lobby lobby;
         private readonly GameSimulator simulator;
+        private readonly ServerHighscoreHelper serverHighscore;
 
         private uint[] playerTurns;
         private int currentPlayerTurn;
@@ -30,10 +32,12 @@ namespace Dungen.Netcode
         public uint CurrentTurnPlayerId => playerTurns[currentPlayerTurn];
         public bool GameStarted { get; private set; }
 
-        public DungenServer(ushort port, GameSimulator simulator) : base(port, MessageInfo.dungenTypeMap)
+        public DungenServer(ushort port, GameSimulator simulator, ServerHighscoreHelper serverHighscore) : base(port,
+            MessageInfo.dungenTypeMap)
         {
             lobby = new Lobby(this, 4);
             this.simulator = simulator;
+            this.serverHighscore = serverHighscore;
         }
 
         private void HandleStartRequest(NetworkConnection connection, MessageHeader header)
@@ -142,18 +146,32 @@ namespace Dungen.Netcode
 
         private void StartGame()
         {
+            if (!serverHighscore.ServerLoginRequest())
+            {
+                Debug.LogError("Server login failed, will not publish highscores for this session.");
+            }
+
             lobby.ClearReadyStatus();
 
             GameStarted = true;
 
             SendBroadcast(new GameStartingMessage());
-            
+
+            // Do first turn
             MoveNextTurn();
         }
 
         public void EndGame()
         {
             GameStarted = false;
+
+            if (serverHighscore.ServerLoggedIn)
+            {
+                foreach (var id in lobby.HighscoreServerIds)
+                {
+                    serverHighscore.SendHighscoreSubmitRequest(id, simulator.Score);
+                }
+            }
         }
 
         private void MoveNextTurn()
