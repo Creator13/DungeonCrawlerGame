@@ -56,8 +56,7 @@ namespace Dungen.Gameplay
             playerInputActions["PointerClick"].performed += HandleClick;
             playerInputActions["PointerMove"].performed += HandlePointerMove;
 
-            playerInputActions["SwitchToMove"].performed += SwitchToMoveMode;
-            playerInputActions["SwitchToAttack"].performed += SwitchToAttackMode;
+            playerInputActions["SwitchToMove"].performed += ToggleMode;
 
             // followCam.CameraMoved += OnCameraMoved;
         }
@@ -83,7 +82,7 @@ namespace Dungen.Gameplay
 
         private void HandlePointerMove(InputAction.CallbackContext ctx)
         {
-            if (!hasTurn) return;
+            if (!hasTurn || controllingEntity.IsMoving) return;
 
             var screenPos = ctx.ReadValue<Vector2>();
             UpdatePointerWorldPosition(screenPos);
@@ -124,13 +123,27 @@ namespace Dungen.Gameplay
             }
         }
 
-        private void SwitchToMoveMode(InputAction.CallbackContext ctx)
+        private void ToggleMode(InputAction.CallbackContext ctx)
+        {
+            if (!hasTurn || controllingEntity.IsMoving) return;
+            
+            if (mode == Mode.Move)
+            {
+                SwitchToAttackMode();
+            }
+            else
+            {
+                SwitchToMoveMode();
+            }
+        }
+
+        private void SwitchToMoveMode()
         {
             mode = Mode.Move;
             HideRadius();
         }
 
-        private void SwitchToAttackMode(InputAction.CallbackContext ctx)
+        private void SwitchToAttackMode()
         {
             currentAttackRadius = controllingEntity.grid.TilesInRadius(controllingEntity.CurrentTile, 2);
             mode = Mode.Attack;
@@ -173,7 +186,7 @@ namespace Dungen.Gameplay
             }
             else
             {
-                currentTargetedTile?.SetMarked(false);
+                SetMarkedTile(null);
                 currentTargetedTile = null;
             }
         }
@@ -197,8 +210,8 @@ namespace Dungen.Gameplay
             }
             else
             {
+                SetMarkedTile(null);
                 ClearPath();
-                currentTargetedTile?.SetMarked(false);
                 currentTargetedTile = null;
             }
         }

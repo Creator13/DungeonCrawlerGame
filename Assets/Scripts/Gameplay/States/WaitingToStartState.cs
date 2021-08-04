@@ -16,8 +16,6 @@ namespace Dungen.Gameplay.States
         {
             base.Enter(parent);
 
-            Debug.Log("Press space to start");
-
             blackboard.gameController.Client.AddHandler(DungenMessage.StartRequestResponse, HandleStartRequestResponse);
             blackboard.gameController.Client.AddHandler(DungenMessage.GameStartData, HandleGameStartData);
             blackboard.gameController.Client.AddHandler(DungenMessage.GameStarting, HandleGameStarting);
