@@ -53,7 +53,7 @@ namespace Dungen.Gameplay.States
 
             blackboard.gameController.InitializeWorld(dataMessage.playerData);
 
-            blackboard.gameController.Client.SendPackedMessage(new ClientReadyMessage());
+            blackboard.gameController.Client.SendMessage(new ClientReadyMessage());
         }
 
         private void HandleGameStarting(MessageHeader header)

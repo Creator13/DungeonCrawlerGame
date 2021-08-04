@@ -11,7 +11,6 @@ namespace Dungen.Netcode
     {
         public PlayerInfo playerInfo;
         public int highscoreServerId;
-        public bool sentData;
         public bool ready;
     }
 
@@ -81,7 +80,7 @@ namespace Dungen.Netcode
                 foreach (var player in others)
                 {
                     var msg = new PlayerJoinedMessage {playerInfo = player};
-                    server.SendUnicast(connection, msg);
+                    server.SendMessage(connection, msg);
                 }
 
                 Debug.Log($"{handshake.requestedPlayerName} joined the lobby!");
@@ -105,7 +104,7 @@ namespace Dungen.Netcode
                 };
             }
 
-            server.SendUnicast(connection, handshakeResponse);
+            server.SendMessage(connection, handshakeResponse);
         }
 
         public uint GetNetworkIdOfConnection(NetworkConnection connection)

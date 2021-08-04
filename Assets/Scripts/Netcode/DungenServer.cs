@@ -46,7 +46,7 @@ namespace Dungen.Netcode
             var _ = (StartRequestMessage) header;
 
 #if DUNGEN_NETWORK_DEBUG && UNITY_EDITOR
-            SendUnicast(connection, new StartRequestResponseMessage {
+            SendMessage(connection, new StartRequestResponseMessage {
                 status = StartRequestResponseMessage.StartRequestResponse.Accepted
             });
 

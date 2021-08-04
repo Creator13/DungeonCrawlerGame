@@ -116,13 +116,13 @@ namespace Dungen.Gameplay
         public void RequestMove(Vector2Int newPosition)
         {
             var moveRequest = new MoveActionRequestMessage {newPosition = newPosition};
-            Client.SendPackedMessage(moveRequest);
+            Client.SendMessage(moveRequest);
         }
 
         public void RequestAttack(Vector2Int enemyPosition)
         {
             var attackRequest = new AttackActionRequestMessage {attackPosition = enemyPosition};
-            Client.SendPackedMessage(attackRequest);
+            Client.SendMessage(attackRequest);
         }
 
         public void SetTurn(uint playerId)

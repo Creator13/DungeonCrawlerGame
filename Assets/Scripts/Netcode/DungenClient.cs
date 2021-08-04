@@ -40,7 +40,7 @@ namespace Dungen.Netcode
                 requestedPlayerName = originalPlayerName, 
                 highscoreServerId = gameController.PlayerHighscoreHelper.CurrentUser.id
             };
-            SendPackedMessage(handshake);
+            SendMessage(handshake);
         }
 
         protected override void OnDisconnected() { }
@@ -48,7 +48,7 @@ namespace Dungen.Netcode
         public void RequestGameStart()
         {
             var startRequest = new StartRequestMessage();
-            SendPackedMessage(startRequest);
+            SendMessage(startRequest);
         }
 
         private void HandleHandshakeResponse(MessageHeader header)
