@@ -32,7 +32,7 @@ namespace Dungen.Highscore
 
             using var serverAuthRequest = UnityWebRequest.Post(HighscoreConstants.GetUrl("/login/server"), new Dictionary<string, string> {
                     {"game-session", $"{gameSessionId}"},
-                    {"password", HighscoreConstants.VERY_SECRET_SERVER_PASSWORD}
+                    {"password", HighscoreConstants.VERY_SECRET_SERVER_PASSWORD + gameSessionId}
                 }
             );
 

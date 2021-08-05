@@ -54,7 +54,7 @@ namespace Dungen.Netcode
 #else
             if (lobby.PlayerCount > 1 && !lobby.Full)
             {
-                SendUnicast(connection, new StartRequestResponseMessage {
+                SendMessage(connection, new StartRequestResponseMessage {
                     status = StartRequestResponseMessage.StartRequestResponse.Accepted
                 });
 
@@ -62,13 +62,13 @@ namespace Dungen.Netcode
             }
             else if (lobby.PlayerCount < 2)
             {
-                SendUnicast(connection, new StartRequestResponseMessage {
+                SendMessage(connection, new StartRequestResponseMessage {
                     status = StartRequestResponseMessage.StartRequestResponse.NotEnoughPlayers
                 });
             }
             else
             {
-                SendUnicast(connection, new StartRequestResponseMessage {
+                SendMessage(connection, new StartRequestResponseMessage {
                     status = StartRequestResponseMessage.StartRequestResponse.UndefinedFailure
                 });
             }
